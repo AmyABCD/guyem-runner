@@ -6,17 +6,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b101b">
-  <title>Гүем хүүгийн аялал - 301 Сургалт</title>
+  <title>Гүем хүүгийн аялал</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Orientation Landscape Reminder -->
-  <div id="rotate-prompt">
-    <div class="rotate-phone-icon">📱</div>
-    <div class="rotate-title">ДЭЛГЭЦЭЭ ХЭВТЭЭ БОЛГОНО УУ</div>
-    <div class="rotate-desc">Тоглоомыг илүү тав тухтай тоглохын тулд утсаа хэвтээ (Landscape) байрлалд эргүүлнэ үү.</div>
-  </div>
-
 
 <div id="game-container">
   <!-- 60FPS High-DPI Canvas -->
@@ -53,7 +46,7 @@
     </div>
 
     <div class="hud-right">
-      <button id="btn-sound" class="hud-btn" title="Дуу хаах/нээх">🔊</button>
+      <button id="btn-sound" class="hud-btn" title="Дуу">🔊</button>
       <button id="btn-fullscreen" class="hud-btn" title="Бүтэн дэлгэц">⛶</button>
     </div>
   </div>
@@ -72,9 +65,8 @@
 
   <!-- Gentle Reminder Toast Banner (Slide 14) -->
   <div id="reminder-banner">
-    <div class="reminder-icon">🔔</div>
-    <div class="reminder-text">
-      <strong>Ээжийн намуухан сануулга:</strong><br>
+    <div style="font-size:24px;">🔔</div>
+    <div style="font-size:13px; font-weight:800; color:#fff;">
       "Миний хүү, 10 секундийн дараа тоглоомоо дуусгаарай!"
     </div>
   </div>
@@ -84,35 +76,25 @@
     <div class="countdown-number">3</div>
   </div>
 
-  <!-- Intro Modal (Rules & Mode Selection) -->
+  <!-- Clean Intro Modal (NO SPOILERS, Fits Screen Height) -->
   <div id="intro-modal" class="modal-overlay">
     <div class="modal-card">
-      <img src="assets/guyem_run.png" class="modal-header-img" alt="Guyem Cub">
-      <h1 class="modal-title">Гүем хүүгийн аялал</h1>
-      <p id="mode-subtitle" class="modal-subtitle">🐾 Зорилго: Аав ээждээ хүрч, тэврэхэд нь тусалъя!</p>
-
-      <!-- Mode Selector -->
-      <div class="mode-selector">
-        <div id="tab-interrupt" class="mode-tab tab-interrupt active">
-          🔴 Слайд 13<br><span style="font-size:10px;">Гэнэт таслах</span>
-        </div>
-        <div id="tab-gentle" class="mode-tab tab-gentle">
-          🟢 Слайд 14<br><span style="font-size:10px;">Урьдчилан сануулах</span>
+      <div class="modal-top-row">
+        <img src="assets/guyem_run.png" class="modal-mascot-img" alt="Guyem">
+        <div class="modal-title-box">
+          <h1 class="modal-title">Гүем хүүгийн аялал</h1>
+          <p class="modal-subtitle">🐾 Аав ээждээ хүрч, тэврэхэд нь тусалъя!</p>
         </div>
       </div>
 
-      <div class="rules-box">
-        <div class="rule-item">
-          <span class="rule-badge badge-jump">⬆️ ҮСРЭХ</span>
-          <span>Газраар ирэх үгсийг дээгүүр нь харайж өнгөрнө</span>
+      <div class="rules-grid">
+        <div class="rule-card">
+          <span class="rule-badge jump">⬆️ ҮСРЭХ</span>
+          <p class="rule-desc">Газраар ирэх үгэн сумыг дээгүүр нь харайна</p>
         </div>
-        <div class="rule-item">
-          <span class="rule-badge badge-slide">⬇️ ХЭВТЭХ</span>
-          <span>Дээгүүр нисэх үгсийг доогуур нь гулгаж өнгөрнө</span>
-        </div>
-        <div class="rule-item">
-          <span class="rule-badge badge-goal">🎯 БАРИА</span>
-          <span>Аав ээждээ хүрэхэд ердөө 45 секунд шаардлагатай!</span>
+        <div class="rule-card">
+          <span class="rule-badge slide">⬇️ ХЭВТЭХ</span>
+          <p class="rule-desc">Дээгүүр нисэх үгэн сумыг доогуур нь гулгана</p>
         </div>
       </div>
 
@@ -120,59 +102,46 @@
     </div>
   </div>
 
-  <!-- Slide 13: Sudden Cutoff Interruption Overlay -->
+  <!-- Slide 13: Interruption Overlay -->
   <div id="interruption-overlay">
     <div class="rage-emojis">😡 🤬 💢 ⚡</div>
     <h1 class="rage-text">ОДОО НААД УТСАА БОЛИОД<br>ГЭР ОРНОО ЦЭВЭРЛЭ!</h1>
   </div>
 
-  <!-- Slide 13: Post-Climax Reflection Modal for Parents -->
+  <!-- Slide 13: Reflection Modal -->
   <div id="reflection-modal" class="modal-overlay">
     <div class="modal-card reflection-card">
-      <div class="reflection-icon">🛑</div>
-      <h2 class="reflection-title">ТАНД ЯГ ОДОО ЮУ МЭДРЭГДСЭН БЭ?</h2>
-
-      <div class="reflection-prompt">
-        💬 <strong>Та яг ялахын даваан дээр байхад чинь гэнэт таслахад ямар санагдсан бэ? Бухимдал, гомдол, дургүйцэл төрсөн үү?</strong>
+      <div style="font-size:32px; margin-bottom:4px;">🛑</div>
+      <h2 style="font-size:17px; font-weight:900; color:#fca5a5; margin-bottom:6px;">
+        ТАНД ЯГ ОДОО ЮУ МЭДРЭГДСЭН БЭ?
+      </h2>
+      <div style="font-size:12px; color:#fff; background:rgba(239,68,68,0.2); padding:8px; border-radius:8px; margin-bottom:10px; text-align:left; line-height:1.4;">
+        💬 <strong>Та яг ялахын даваан дээр байхад чинь гэнэт таслахад ямар санагдсан бэ? Бухимдал, гомдол төрсөн үү?</strong>
       </div>
-
-      <div class="insight-list">
-        <div class="insight-item">
-          <strong>🧠 Хүүхдийн сэтгэл зүйн бодит үнэн:</strong>
-          Хүүхэд тоглоом тоглохдоо зүгээр цаг нөхцөөдөггүй — тэд ялалт, үр дүн, амжилтын төлөө бүх анхаарлаа 100% төвлөрүүлдэг. Тэр үед нь утсыг нь гэнэт булаах эсвэл шууд загнах үед хүүхдэд яг одоо танд төрсөн шиг маш хүчтэй бухимдал үүсдэг.
-        </div>
-        <div class="insight-item">
-          <strong>💡 Эцэг эхийн зөв хандлага (Слайд 14):</strong>
-          Гэнэт таслах биш — 5-10 минутын өмнө сануулж, дуусгах боломж олгох нь гэр бүлийн уур амьсгалыг авардаг.
-        </div>
+      <div style="font-size:11.5px; color:#cbd5e1; text-align:left; line-height:1.45; margin-bottom:12px;">
+        • <strong>Хүүхдийн сэтгэл зүй:</strong> Хүүхэд зүгээр цаг нөхцөөгөөгүй — ялалт, үр дүнгийн төлөө бүх анхаарлаа дайчилж байдаг. Тэр үед нь утсыг булаах эсвэл загнах үед хүүхдэд яг танд одоо төрсөн шиг хүчтэй бухимдал үүсдэг.<br><br>
+        • <strong>Зөв шийдэл:</strong> Гэнэт таслах биш — 5-10 минутын өмнө сануулж, дуусгах боломж олгоорой.
       </div>
-
-      <div class="btn-group">
-        <button id="btn-restart" class="btn-restart">🔄 Дахин тоглох</button>
-      </div>
+      <button id="btn-restart" class="primary-btn" style="background:linear-gradient(135deg, #10b981, #059669); padding:10px 20px; font-size:14px;">
+        🔄 Дахин тоглох
+      </button>
     </div>
   </div>
 
-  <!-- Slide 14: Victory & Family Hug Overlay -->
+  <!-- Slide 14: Victory Hug Overlay -->
   <div id="victory-overlay">
     <img src="assets/family_hug.png" class="hug-image" alt="Family Hug">
-    <h1 class="victory-title">ХАЛУУН ДУЛААН ЯЛАЛТ! ❤️</h1>
-    <p class="victory-subtitle">
-      Та урьдчилан сануулга сонсоод, тоглоомоо амжилттай дуусгаж, аав ээждээ тэврүүллээ!
+    <h1 style="font-size:20px; font-weight:900; color:#fbcfe8; margin-bottom:6px;">ХАЛУУН ДУЛААН ЯЛАЛТ! ❤️</h1>
+    <p style="font-size:12px; color:#ffffff; max-width:400px; margin-bottom:10px;">
+      Та урьдчилан сануулга сонсоод тоглоомоо амжилттай дуусгаж, аав ээждээ тэврүүллээ!
     </p>
-
-    <div class="modal-card" style="max-width: 480px; text-align: left; padding: 20px; margin-bottom: 15px;">
-      <div style="font-size: 14px; color: #a7f3d0; font-weight: 800; margin-bottom: 8px;">
-        💡 Урьдчилан сануулахын гайхамшигт үр дүн:
-      </div>
-      <div style="font-size: 13px; color: #cbd5e1; line-height: 1.5;">
-        • Хүүхдэд тоглолтоо дуусгах, ялалтаа мэдрэх <strong>боломж</strong> олгосон.<br>
-        • Хүүхдийн тархинд стресс, бухимдал бус харин <strong>амжилт, тайвшрал</strong> үүссэн.<br>
-        • Утас хураах үйл явц хэрүүл биш, <strong>гэр бүлийн халуун дулаан тэврэлт</strong> болон хувирлаа!
-      </div>
+    <div class="modal-card" style="max-width:420px; text-align:left; padding:10px 14px; margin-bottom:10px; font-size:11.5px; line-height:1.45;">
+      <strong style="color:#a7f3d0;">💡 10 минутын өмнө сануулахын үр дүн:</strong><br>
+      • Хүүхдэд тоглолтоо дуусгах, ялалтаа мэдрэх <strong>боломж</strong> олгосон.<br>
+      • Хүүхдэд бухимдал биш <strong>тайвшрал</strong> үүссэн.<br>
+      • Утас хураах үйл явц хэрүүл биш <strong>халуун дулаан тэврэлт</strong> болж хувирлаа!
     </div>
-
-    <button id="btn-restart-victory" class="btn-restart" style="max-width: 260px; padding: 14px 28px;">
+    <button id="btn-restart-victory" class="primary-btn" style="max-width:220px; padding:10px 20px; font-size:14px; background:linear-gradient(135deg, #10b981, #059669);">
       🔄 Дахин турших
     </button>
   </div>

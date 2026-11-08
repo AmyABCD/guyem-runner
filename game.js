@@ -1,25 +1,23 @@
-// game.js - Guyem Runner Engine (Supporting Slide 13 Interruption & Slide 14 Gentle Modes)
+// game.js - Guyem Runner Engine
 const CANVAS_WIDTH = 960;
 const CANVAS_HEIGHT = 540;
 const GROUND_Y = 430;
-const TOTAL_RUN_DURATION = 46; // seconds
+const TOTAL_RUN_DURATION = 42;
 
 const HIGH_WORDS = [
-  "Одоохон утсаа тавь!",
-  "Хичээлээ хийгээч ээ!",
-  "Хэнтэй чатлаад байгаа юм?",
-  "Наад тоглоомоо унтраа!",
-  "Утаснаас салахгүй юм!",
-  "Нүд чинь өвдлөө!"
+  "Наадхаа унтраа!",
+  "Хэнтэй чатлаад бна?",
+  "Утаснаас сал!",
+  "Нүд өвдлөө!",
+  "Одоохон тавь!"
 ];
 
 const LOW_WORDS = [
   "Залхуу!",
-  "Битгий тоглоод бай!",
-  "Гэрээ цэвэрлэ!",
+  "Утсаа тавь!",
   "Цагаа хар!",
-  "Ахиад л тоглоом уу?!",
-  "Юугаа гөлрөөд байгаа юм!"
+  "Болиоч ээ!",
+  "Хичээлээ хий!"
 ];
 
 const GENTLE_WORDS = [
@@ -35,7 +33,6 @@ class GuyemGame {
     this.canvas = document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
 
-    // Mode: 'interrupt' (Slide 13) or 'gentle' (Slide 14)
     const urlParams = new URLSearchParams(window.location.search);
     this.mode = urlParams.get("mode") === "gentle" ? "gentle" : "interrupt";
 
@@ -44,18 +41,17 @@ class GuyemGame {
     this.hearts = 5;
     this.elapsedTime = 0;
     this.gameSpeed = 330;
-
     this.reminderTriggered = false;
 
-    // Player (Guyem)
+    // Player (Guyem) - Tuned Jump & Slide Physics
     this.guyem = {
       x: 140,
       y: GROUND_Y - 110,
       width: 110,
       height: 110,
       vy: 0,
-      gravity: 1450,
-      jumpImpulse: -720,
+      gravity: 1250,      // Soft, floaty gravity
+      jumpImpulse: -800,  // Floaty high jump (clears any obstacle cleanly)
       isGrounded: true,
       isSliding: false,
       slideTimer: 0,
@@ -66,12 +62,11 @@ class GuyemGame {
     this.obstacles = [];
     this.particles = [];
     this.floatingTexts = [];
-    this.confetti = [];
-    this.spawnTimer = 1.2;
+    this.spawnTimer = 1.4;
 
     this.parents = {
       active: false,
-      x: CANVAS_WIDTH + 100,
+      x: CANVAS_WIDTH + 50,
       y: GROUND_Y - 150,
       width: 150,
       height: 150
@@ -86,7 +81,6 @@ class GuyemGame {
     this.initCanvasSize();
     this.bindEvents();
     this.loadAssets();
-    this.updateModeUI();
   }
 
   initCanvasSize() {
@@ -122,10 +116,7 @@ class GuyemGame {
       img.onload = () => {
         this.assets[item.key] = img;
         loaded++;
-        if (loaded === list.length) {
-          this.assetsLoaded = true;
-          console.log("All game assets loaded!");
-        }
+        if (loaded === list.length) this.assetsLoaded = true;
       };
       img.onerror = () => {
         loaded++;
@@ -134,49 +125,17 @@ class GuyemGame {
     });
   }
 
-  updateModeUI() {
-    const tabInterrupt = document.getElementById("tab-interrupt");
-    const tabGentle = document.getElementById("tab-gentle");
-    if (tabInterrupt && tabGentle) {
-      tabInterrupt.classList.toggle("active", this.mode === "interrupt");
-      tabGentle.classList.toggle("active", this.mode === "gentle");
-    }
-
-    const modeSubtitle = document.getElementById("mode-subtitle");
-    if (modeSubtitle) {
-      if (this.mode === "interrupt") {
-        modeSubtitle.textContent = "🔴 1-р Туршилт: Слайд 13 (Гэнэт таслах үеийн мэдрэмж)";
-      } else {
-        modeSubtitle.textContent = "🟢 2-р Туршилт: Слайд 14 (Урьдчилан сануулж, тэврэлдэх)";
-      }
-    }
-  }
-
-  setMode(newMode) {
-    this.mode = newMode;
-    this.updateModeUI();
-  }
-
   bindEvents() {
-    // Mode tabs
-    const tabInterrupt = document.getElementById("tab-interrupt");
-    const tabGentle = document.getElementById("tab-gentle");
-    if (tabInterrupt) tabInterrupt.addEventListener("click", () => this.setMode("interrupt"));
-    if (tabGentle) tabGentle.addEventListener("click", () => this.setMode("gentle"));
-
-    // Start
     document.getElementById("btn-start").addEventListener("click", () => {
       document.getElementById("intro-modal").style.display = "none";
       this.startCountdown();
     });
 
-    // Sound toggle
     document.getElementById("btn-sound").addEventListener("click", () => {
       const isMuted = window.soundManager.toggleMute();
       document.getElementById("btn-sound").textContent = isMuted ? "🔇" : "🔊";
     });
 
-    // Fullscreen toggle
     document.getElementById("btn-fullscreen").addEventListener("click", () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
@@ -185,7 +144,6 @@ class GuyemGame {
       }
     });
 
-    // Restart buttons
     const restartHandler = () => {
       document.getElementById("reflection-modal").classList.remove("active");
       document.getElementById("victory-overlay").classList.remove("active");
@@ -198,7 +156,6 @@ class GuyemGame {
     const btnRestartVictory = document.getElementById("btn-restart-victory");
     if (btnRestartVictory) btnRestartVictory.addEventListener("click", restartHandler);
 
-    // Touch control buttons
     const btnJump = document.getElementById("btn-jump");
     const btnSlide = document.getElementById("btn-slide");
 
@@ -226,23 +183,17 @@ class GuyemGame {
     btnSlide.addEventListener("mousedown", doSlide);
     btnSlide.addEventListener("mouseup", endSlide);
 
-    // Swipe & Screen Tap
     let touchStartY = 0;
-    let touchStartX = 0;
     this.canvas.addEventListener("touchstart", (e) => {
-      if (e.touches.length > 0) {
-        touchStartY = e.touches[0].clientY;
-        touchStartX = e.touches[0].clientX;
-      }
+      if (e.touches.length > 0) touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
     this.canvas.addEventListener("touchend", (e) => {
       if (e.changedTouches.length > 0) {
         const deltaY = e.changedTouches[0].clientY - touchStartY;
-        if (Math.abs(deltaY) > 30) {
-          if (deltaY < -30) this.handleJump();
-          else if (deltaY > 30) this.handleSlide();
-        } else {
+        if (deltaY < -30) this.handleJump();
+        else if (deltaY > 30) this.handleSlide();
+        else {
           const rect = this.canvas.getBoundingClientRect();
           const relY = (touchStartY - rect.top) / rect.height;
           if (relY < 0.55) this.handleJump();
@@ -251,7 +202,6 @@ class GuyemGame {
       }
     }, { passive: true });
 
-    // Keyboard
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
         e.preventDefault();
@@ -278,9 +228,9 @@ class GuyemGame {
     if (this.state !== "PLAYING") return;
     if (this.guyem.isGrounded && !this.guyem.isSliding) {
       this.guyem.isSliding = true;
-      this.guyem.slideTimer = 0.72;
-      this.guyem.height = 60;
-      this.guyem.y = GROUND_Y - 60;
+      this.guyem.slideTimer = 1.1; // 1.1s generous slide time
+      this.guyem.height = 45;      // very low profile
+      this.guyem.y = GROUND_Y - 45;
       window.soundManager.playSlide();
       if (navigator.vibrate) navigator.vibrate(20);
       this.createDustParticles(this.guyem.x + 50, GROUND_Y, 6, "#06b6d4");
@@ -297,22 +247,16 @@ class GuyemGame {
     const tick = () => {
       if (count > 0) {
         numEl.textContent = count;
-        numEl.style.animation = "none";
-        void numEl.offsetWidth;
-        numEl.style.animation = "countPulse 0.85s ease-out forwards";
         window.soundManager.playBeep(false);
         count--;
         setTimeout(tick, 900);
       } else {
         numEl.textContent = "ГҮЙГЭЭРЭЙ!";
-        numEl.style.animation = "none";
-        void numEl.offsetWidth;
-        numEl.style.animation = "countPulse 0.85s ease-out forwards";
         window.soundManager.playBeep(true);
         setTimeout(() => {
           overlay.style.display = "none";
           this.startGame();
-        }, 800);
+        }, 750);
       }
     };
     tick();
@@ -327,8 +271,7 @@ class GuyemGame {
     this.obstacles = [];
     this.particles = [];
     this.floatingTexts = [];
-    this.confetti = [];
-    this.spawnTimer = 1.0;
+    this.spawnTimer = 1.4;
     this.reminderTriggered = false;
     this.parents.active = false;
     this.lastTime = performance.now();
@@ -359,10 +302,7 @@ class GuyemGame {
     this.score += Math.floor(dt * 30);
     document.getElementById("score-text").textContent = String(this.score).padStart(5, "0");
 
-    this.gameSpeed = 340 + (this.elapsedTime / TOTAL_RUN_DURATION) * 140;
-    // Dynamic forward surge towards parents
-    const targetX = 120 + (this.elapsedTime / TOTAL_RUN_DURATION) * 120;
-    this.guyem.x += (targetX - this.guyem.x) * dt * 2.0;
+    this.gameSpeed = 340 + (this.elapsedTime / TOTAL_RUN_DURATION) * 120;
 
     const progressPct = Math.min((this.elapsedTime / TOTAL_RUN_DURATION) * 100, 95);
     document.getElementById("progress-fill").style.width = `${progressPct}%`;
@@ -374,35 +314,39 @@ class GuyemGame {
     this.bgX = (this.bgX - this.gameSpeed * 0.45 * dt) % CANVAS_WIDTH;
     this.updateGuyem(dt);
 
-    // MODE 2 (GENTLE): 13 seconds before end -> Gentle voice reminder!
-    if (this.mode === "gentle" && !this.reminderTriggered && this.elapsedTime >= TOTAL_RUN_DURATION - 13) {
+    const targetX = 120 + (this.elapsedTime / TOTAL_RUN_DURATION) * 110;
+    this.guyem.x += (targetX - this.guyem.x) * dt * 2.0;
+
+    // SLIDE 14: Gentle reminder 12 seconds before end
+    if (this.mode === "gentle" && !this.reminderTriggered && this.elapsedTime >= TOTAL_RUN_DURATION - 12) {
       this.reminderTriggered = true;
       this.triggerGentleReminder();
     }
 
-    // Spawn Parents entity near climax
-    if (this.elapsedTime >= TOTAL_RUN_DURATION - 4.5 && !this.parents.active) {
+    // End approach: Parents appear on right edge of screen (~40s in)
+    if (this.elapsedTime >= TOTAL_RUN_DURATION - 2.5 && !this.parents.active) {
       this.parents.active = true;
-      this.parents.x = CANVAS_WIDTH + 80;
-    }
+      this.parents.x = CANVAS_WIDTH - 130;
 
-    if (this.parents.active) {
-      this.parents.x -= this.gameSpeed * dt;
-
-      // When Guyem reaches parents
-      if (this.parents.x <= this.guyem.x + 90) {
-        if (this.mode === "interrupt") {
-          this.triggerInterruptionClimax();
-        } else {
-          this.triggerVictoryHug();
-        }
+      // IN INTERRUPT MODE (Slide 13):
+      // The user requested: "огт хүрээгүй байхад нь, утасны захад гарч ирэхэд нь шууд зогсоомоор байна"
+      if (this.mode === "interrupt") {
+        setTimeout(() => this.triggerInterruptionClimax(), 350);
         return;
       }
-    } else {
+    }
+
+    if (this.parents.active && this.mode === "gentle") {
+      this.parents.x -= this.gameSpeed * 0.5 * dt;
+      if (this.parents.x <= this.guyem.x + 90) {
+        this.triggerVictoryHug();
+        return;
+      }
+    } else if (!this.parents.active) {
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
         this.spawnObstacle();
-        this.spawnTimer = 1.3 + Math.random() * 0.9;
+        this.spawnTimer = 1.4 + Math.random() * 0.8;
       }
     }
 
@@ -448,14 +392,13 @@ class GuyemGame {
   }
 
   spawnObstacle() {
-    // In gentle mode after reminder, spawn sweet encouraging words
     if (this.mode === "gentle" && this.reminderTriggered) {
       const text = GENTLE_WORDS[Math.floor(Math.random() * GENTLE_WORDS.length)];
       this.obstacles.push({
         x: CANVAS_WIDTH + 20,
-        y: GROUND_Y - 100,
-        width: 170 + text.length * 6,
-        height: 54,
+        y: GROUND_Y - 110,
+        width: 150,
+        height: 48,
         isHigh: false,
         text: text,
         passed: false,
@@ -464,14 +407,16 @@ class GuyemGame {
       return;
     }
 
-    const isHigh = Math.random() > 0.48;
+    const isHigh = Math.random() > 0.5;
     const text = isHigh
       ? HIGH_WORDS[Math.floor(Math.random() * HIGH_WORDS.length)]
       : LOW_WORDS[Math.floor(Math.random() * LOW_WORDS.length)];
 
-    const width = 170 + text.length * 6;
-    const height = 54;
-    const y = isHigh ? GROUND_Y - 140 : GROUND_Y - 54;
+    const width = 140;
+    const height = 44;
+    // High arrow is way up at GROUND_Y - 165 (80px clearance over sliding player)
+    // Low arrow is down at GROUND_Y - 44 (huge clearance over jumping player)
+    const y = isHigh ? GROUND_Y - 165 : GROUND_Y - 44;
 
     this.obstacles.push({
       x: CANVAS_WIDTH + 20,
@@ -510,16 +455,16 @@ class GuyemGame {
   }
 
   checkCollision(guyem, obs) {
-    const margin = 12;
+    const margin = 14;
     const gx = guyem.x + margin;
     const gy = guyem.y + margin;
-    const gw = (guyem.isSliding ? 130 : guyem.width) - margin * 2;
+    const gw = (guyem.isSliding ? 120 : guyem.width) - margin * 2;
     const gh = guyem.height - margin * 2;
 
-    const ox = obs.x + 10;
-    const oy = obs.y + 6;
-    const ow = obs.width - 20;
-    const oh = obs.height - 12;
+    const ox = obs.x + 8;
+    const oy = obs.y + 4;
+    const ow = obs.width - 16;
+    const oh = obs.height - 8;
 
     return (
       gx < ox + ow &&
@@ -600,7 +545,6 @@ class GuyemGame {
     }
   }
 
-  // --- SLIDE 14: GENTLE REMINDER TOAST & AUDIO ---
   triggerGentleReminder() {
     const banner = document.getElementById("reminder-banner");
     banner.classList.add("active");
@@ -609,7 +553,6 @@ class GuyemGame {
     });
   }
 
-  // --- SLIDE 13: SUDDEN ABRUPT CUTOFF CLIMAX ---
   triggerInterruptionClimax() {
     this.state = "INTERRUPTED";
     if (navigator.vibrate) navigator.vibrate([400, 120, 400, 120, 800]);
@@ -626,7 +569,6 @@ class GuyemGame {
     }, 4200);
   }
 
-  // --- SLIDE 14: FAMILY HUG VICTORY ---
   triggerVictoryHug() {
     this.state = "VICTORY";
     window.soundManager.stopBGM();
@@ -643,7 +585,6 @@ class GuyemGame {
     document.getElementById("reflection-modal").classList.add("active");
   }
 
-  // --- Rendering Pipeline ---
   render() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -675,19 +616,10 @@ class GuyemGame {
       if (parentSprite) {
         ctx.drawImage(parentSprite, this.parents.x, this.parents.y, this.parents.width, this.parents.height);
       }
-
-      ctx.fillStyle = this.mode === "gentle" ? "rgba(16, 185, 129, 0.95)" : "rgba(239, 68, 68, 0.95)";
-      ctx.beginPath();
-      ctx.roundRect(this.parents.x - 30, this.parents.y - 30, 210, 32, 10);
-      ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 15px -apple-system, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(this.mode === "gentle" ? "БАРИА! ХАЙРТ ААВ ЭЭЖ ❤️" : "БАРИА! ААВ ЭЭЖ ⚠️", this.parents.x + 75, this.parents.y - 9);
       ctx.restore();
     }
 
-    // 3. Obstacles
+    // 3. Obstacles (Razor-Sharp Speech Bubbles)
     this.renderObstacles(ctx);
 
     // 4. Guyem Character
@@ -703,8 +635,8 @@ class GuyemGame {
     const g = this.guyem;
     ctx.save();
 
-    if (g.invulnerableTimer > 0 && Math.floor(Date.now() / 80) % 2 === 0) {
-      ctx.globalAlpha = 0.45;
+    if (g.invulnerableTimer > 0) {
+      ctx.globalAlpha = Math.floor(Date.now() / 70) % 2 === 0 ? 0.35 : 0.85;
     }
 
     let sprite = this.assets.guyemRun;
@@ -721,8 +653,8 @@ class GuyemGame {
     } else if (g.isSliding) {
       sprite = this.assets.guyemSlide || this.assets.guyemRun;
       drawW = 140;
-      drawH = 65;
-      drawY = GROUND_Y - 65;
+      drawH = 45;
+      drawY = GROUND_Y - 45;
     } else {
       drawY += Math.sin(g.runAnimTimer * 18) * 4;
     }
@@ -741,33 +673,36 @@ class GuyemGame {
     this.obstacles.forEach((obs) => {
       ctx.save();
 
-      if (obs.isGentle) {
-        ctx.fillStyle = "rgba(236, 72, 153, 0.9)";
-        ctx.beginPath();
-        ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 20);
-        ctx.fill();
-        ctx.strokeStyle = "#fbcfe8";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      } else if (this.assets.bullet) {
-        ctx.drawImage(this.assets.bullet, obs.x, obs.y, obs.width, obs.height);
-      } else {
-        ctx.fillStyle = obs.isHigh ? "#ef4444" : "#f59e0b";
-        ctx.beginPath();
-        ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 16);
-        ctx.fill();
-      }
+      // Sharp, crystal-clear speech bubble with pointing arrow
+      ctx.fillStyle = obs.isGentle ? "#fdf2f8" : "#fef08a";
+      ctx.strokeStyle = obs.isGentle ? "#db2777" : "#991b1b";
+      ctx.lineWidth = 3;
 
-      ctx.font = "900 14px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.beginPath();
+      ctx.roundRect(obs.x + 8, obs.y, obs.width - 8, obs.height, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      // Left arrow pointer
+      ctx.beginPath();
+      ctx.moveTo(obs.x + 10, obs.y + obs.height / 2 - 8);
+      ctx.lineTo(obs.x - 2, obs.y + obs.height / 2);
+      ctx.lineTo(obs.x + 10, obs.y + obs.height / 2 + 8);
+      ctx.closePath();
+      ctx.fillStyle = obs.isGentle ? "#db2777" : "#991b1b";
+      ctx.fill();
+
+      // Bold 17px text - 100% Crisp & Legible!
+      ctx.font = "bold 17px -apple-system, BlinkMacSystemFont, Arial, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 3;
-      ctx.strokeText(obs.text, obs.x + obs.width / 2 + 5, obs.y + obs.height / 2);
+      ctx.strokeText(obs.text, obs.x + obs.width / 2 + 4, obs.y + obs.height / 2);
 
-      ctx.fillStyle = obs.isGentle ? "#831843" : "#5c1300";
-      ctx.fillText(obs.text, obs.x + obs.width / 2 + 5, obs.y + obs.height / 2);
+      ctx.fillStyle = obs.isGentle ? "#831843" : "#450a0a";
+      ctx.fillText(obs.text, obs.x + obs.width / 2 + 4, obs.y + obs.height / 2);
 
       ctx.restore();
     });
