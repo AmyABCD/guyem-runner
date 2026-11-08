@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b101b">
+  <title>Гүем хүүгийн аялал - 301 Сургалт</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-container">
+  <!-- 60FPS High-DPI Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- In-Game HUD -->
+  <div id="hud">
+    <div class="hud-left">
+      <div class="score-badge">
+        <span>⭐</span>
+        <span id="score-text">00000</span>
+      </div>
+      <div class="hearts-container">
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+        <span class="heart">❤️</span>
+      </div>
+    </div>
+
+    <!-- Distance Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>🐾 Гүем</span>
+        <span>Зай: <span id="distance-text">0%</span></span>
+        <span>👨‍👩‍👦 Аав ээж</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-fill" class="progress-fill"></div>
+        <img id="runner-icon" src="assets/guyem_run.png" class="runner-icon" alt="Guyem">
+        <img src="assets/parents.png" class="target-icon" alt="Parents">
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <button id="btn-sound" class="hud-btn" title="Дуу хаах/нээх">🔊</button>
+      <button id="btn-fullscreen" class="hud-btn" title="Бүтэн дэлгэц">⛶</button>
+    </div>
+  </div>
+
+  <!-- Mobile Touch Controls -->
+  <div id="touch-controls">
+    <div id="btn-slide" class="control-btn btn-slide">
+      <span class="btn-icon">⬇️</span>
+      <span class="btn-text">Хэвтэх</span>
+    </div>
+    <div id="btn-jump" class="control-btn btn-jump">
+      <span class="btn-icon">⬆️</span>
+      <span class="btn-text">Үсрэх</span>
+    </div>
+  </div>
+
+  <!-- Gentle Reminder Toast Banner (Slide 14) -->
+  <div id="reminder-banner">
+    <div class="reminder-icon">🔔</div>
+    <div class="reminder-text">
+      <strong>Ээжийн намуухан сануулга:</strong><br>
+      "Миний хүү, 10 секундийн дараа тоглоомоо дуусгаарай!"
+    </div>
+  </div>
+
+  <!-- Countdown Overlay -->
+  <div id="countdown-overlay">
+    <div class="countdown-number">3</div>
+  </div>
+
+  <!-- Intro Modal (Rules & Mode Selection) -->
+  <div id="intro-modal" class="modal-overlay">
+    <div class="modal-card">
+      <img src="assets/guyem_run.png" class="modal-header-img" alt="Guyem Cub">
+      <h1 class="modal-title">Гүем хүүгийн аялал</h1>
+      <p id="mode-subtitle" class="modal-subtitle">🐾 Зорилго: Аав ээждээ хүрч, тэврэхэд нь тусалъя!</p>
+
+      <!-- Mode Selector -->
+      <div class="mode-selector">
+        <div id="tab-interrupt" class="mode-tab tab-interrupt active">
+          🔴 Слайд 13<br><span style="font-size:10px;">Гэнэт таслах</span>
+        </div>
+        <div id="tab-gentle" class="mode-tab tab-gentle">
+          🟢 Слайд 14<br><span style="font-size:10px;">Урьдчилан сануулах</span>
+        </div>
+      </div>
+
+      <div class="rules-box">
+        <div class="rule-item">
+          <span class="rule-badge badge-jump">⬆️ ҮСРЭХ</span>
+          <span>Газраар ирэх үгсийг дээгүүр нь харайж өнгөрнө</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-badge badge-slide">⬇️ ХЭВТЭХ</span>
+          <span>Дээгүүр нисэх үгсийг доогуур нь гулгаж өнгөрнө</span>
+        </div>
+        <div class="rule-item">
+          <span class="rule-badge badge-goal">🎯 БАРИА</span>
+          <span>Аав ээждээ хүрэхэд ердөө 45 секунд шаардлагатай!</span>
+        </div>
+      </div>
+
+      <button id="btn-start" class="primary-btn">🎮 ТОГЛОЖ ЭХЛЭХ</button>
+    </div>
+  </div>
+
+  <!-- Slide 13: Sudden Cutoff Interruption Overlay -->
+  <div id="interruption-overlay">
+    <div class="rage-emojis">😡 🤬 💢 ⚡</div>
+    <h1 class="rage-text">ОДОО НААД УТСАА БОЛИОД<br>ГЭР ОРНОО ЦЭВЭРЛЭ!</h1>
+  </div>
+
+  <!-- Slide 13: Post-Climax Reflection Modal for Parents -->
+  <div id="reflection-modal" class="modal-overlay">
+    <div class="modal-card reflection-card">
+      <div class="reflection-icon">🛑</div>
+      <h2 class="reflection-title">ТАНД ЯГ ОДОО ЮУ МЭДРЭГДСЭН БЭ?</h2>
+
+      <div class="reflection-prompt">
+        💬 <strong>Та яг ялахын даваан дээр байхад чинь гэнэт таслахад ямар санагдсан бэ? Бухимдал, гомдол, дургүйцэл төрсөн үү?</strong>
+      </div>
+
+      <div class="insight-list">
+        <div class="insight-item">
+          <strong>🧠 Хүүхдийн сэтгэл зүйн бодит үнэн:</strong>
+          Хүүхэд тоглоом тоглохдоо зүгээр цаг нөхцөөдөггүй — тэд ялалт, үр дүн, амжилтын төлөө бүх анхаарлаа 100% төвлөрүүлдэг. Тэр үед нь утсыг нь гэнэт булаах эсвэл шууд загнах үед хүүхдэд яг одоо танд төрсөн шиг маш хүчтэй бухимдал үүсдэг.
+        </div>
+        <div class="insight-item">
+          <strong>💡 Эцэг эхийн зөв хандлага (Слайд 14):</strong>
+          Гэнэт таслах биш — 5-10 минутын өмнө сануулж, дуусгах боломж олгох нь гэр бүлийн уур амьсгалыг авардаг.
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btn-restart" class="btn-restart">🔄 Дахин тоглох</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 14: Victory & Family Hug Overlay -->
+  <div id="victory-overlay">
+    <img src="assets/family_hug.png" class="hug-image" alt="Family Hug">
+    <h1 class="victory-title">ХАЛУУН ДУЛААН ЯЛАЛТ! ❤️</h1>
+    <p class="victory-subtitle">
+      Та урьдчилан сануулга сонсоод, тоглоомоо амжилттай дуусгаж, аав ээждээ тэврүүллээ!
+    </p>
+
+    <div class="modal-card" style="max-width: 480px; text-align: left; padding: 20px; margin-bottom: 15px;">
+      <div style="font-size: 14px; color: #a7f3d0; font-weight: 800; margin-bottom: 8px;">
+        💡 Урьдчилан сануулахын гайхамшигт үр дүн:
+      </div>
+      <div style="font-size: 13px; color: #cbd5e1; line-height: 1.5;">
+        • Хүүхдэд тоглолтоо дуусгах, ялалтаа мэдрэх <strong>боломж</strong> олгосон.<br>
+        • Хүүхдийн тархинд стресс, бухимдал бус харин <strong>амжилт, тайвшрал</strong> үүссэн.<br>
+        • Утас хураах үйл явц хэрүүл биш, <strong>гэр бүлийн халуун дулаан тэврэлт</strong> болон хувирлаа!
+      </div>
+    </div>
+
+    <button id="btn-restart-victory" class="btn-restart" style="max-width: 260px; padding: 14px 28px;">
+      🔄 Дахин турших
+    </button>
+  </div>
+</div>
+
+<script src="audio.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
