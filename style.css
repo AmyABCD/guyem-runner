@@ -742,3 +742,58 @@ canvas#gameCanvas {
   pointer-events: none;
   z-index: 96;
 }
+
+/* 5 Hearts Display */
+.hearts-container {
+  display: flex;
+  gap: 3px;
+  font-size: 18px;
+}
+
+/* Rotate Device Prompt for Portrait Mode */
+#rotate-prompt {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #0b101b;
+  z-index: 9999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  #rotate-prompt {
+    display: flex;
+  }
+}
+
+.rotate-phone-icon {
+  font-size: 50px;
+  animation: rotateDevice 2s infinite ease-in-out;
+  margin-bottom: 16px;
+}
+
+@keyframes rotateDevice {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+
+.rotate-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.rotate-desc {
+  font-size: 14px;
+  color: #94a3b8;
+  max-width: 280px;
+  line-height: 1.45;
+}

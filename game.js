@@ -41,7 +41,7 @@ class GuyemGame {
 
     this.state = "INTRO";
     this.score = 0;
-    this.hearts = 3;
+    this.hearts = 5;
     this.elapsedTime = 0;
     this.gameSpeed = 330;
 
@@ -54,8 +54,8 @@ class GuyemGame {
       width: 110,
       height: 110,
       vy: 0,
-      gravity: 1900,
-      jumpImpulse: -750,
+      gravity: 1450,
+      jumpImpulse: -720,
       isGrounded: true,
       isSliding: false,
       slideTimer: 0,
@@ -321,7 +321,7 @@ class GuyemGame {
   startGame() {
     this.state = "PLAYING";
     this.score = 0;
-    this.hearts = 3;
+    this.hearts = 5;
     this.elapsedTime = 0;
     this.gameSpeed = 340;
     this.obstacles = [];
@@ -360,6 +360,9 @@ class GuyemGame {
     document.getElementById("score-text").textContent = String(this.score).padStart(5, "0");
 
     this.gameSpeed = 340 + (this.elapsedTime / TOTAL_RUN_DURATION) * 140;
+    // Dynamic forward surge towards parents
+    const targetX = 120 + (this.elapsedTime / TOTAL_RUN_DURATION) * 120;
+    this.guyem.x += (targetX - this.guyem.x) * dt * 2.0;
 
     const progressPct = Math.min((this.elapsedTime / TOTAL_RUN_DURATION) * 100, 95);
     document.getElementById("progress-fill").style.width = `${progressPct}%`;
@@ -527,7 +530,7 @@ class GuyemGame {
   }
 
   handleHit(obs) {
-    this.guyem.invulnerableTimer = 1.4;
+    this.guyem.invulnerableTimer = 1.8;
     this.screenShakeTime = 0.25;
     window.soundManager.playHurt();
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
@@ -535,7 +538,7 @@ class GuyemGame {
     this.hearts = Math.max(0, this.hearts - 1);
     this.updateHeartsUI();
 
-    this.createFloatingText(this.guyem.x + 30, this.guyem.y - 20, "Овой!", "#ef4444");
+    this.createFloatingText(this.guyem.x + 30, this.guyem.y - 20, "Овой! -1 ❤️", "#ef4444");
     this.createDustParticles(this.guyem.x + 50, this.guyem.y + 50, 12, "#ef4444");
 
     if (this.hearts === 0) {
