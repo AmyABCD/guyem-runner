@@ -183,21 +183,58 @@ class GuyemGame {
     btnSlide.addEventListener("mousedown", doSlide);
     btnSlide.addEventListener("mouseup", endSlide);
 
+    let touchStartX = 0;
     let touchStartY = 0;
-    this.canvas.addEventListener("touchstart", (e) => {
-      if (e.touches.length > 0) touchStartY = e.touches[0].clientY;
+    let touchStartTime = 0;
+    let swipeTriggered = false;
+
+    window.addEventListener("touchstart", (e) => {
+      if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+        swipeTriggered = false;
+      }
     }, { passive: true });
 
-    this.canvas.addEventListener("touchend", (e) => {
-      if (e.changedTouches.length > 0) {
+    window.addEventListener("touchmove", (e) => {
+      if (swipeTriggered || this.state !== "PLAYING") return;
+      if (e.touches.length > 0) {
+        const deltaY = e.touches[0].clientY - touchStartY;
+        const deltaX = e.touches[0].clientX - touchStartX;
+        if (Math.abs(deltaY) > 20 && Math.abs(deltaY) > Math.abs(deltaX) * 0.8) {
+          if (deltaY < -20) {
+            swipeTriggered = true;
+            this.handleJump();
+          } else if (deltaY > 20) {
+            swipeTriggered = true;
+            this.handleSlide();
+          }
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", (e) => {
+      if (this.state !== "PLAYING") return;
+      if (!swipeTriggered && e.changedTouches.length > 0) {
         const deltaY = e.changedTouches[0].clientY - touchStartY;
-        if (deltaY < -30) this.handleJump();
-        else if (deltaY > 30) this.handleSlide();
-        else {
-          const rect = this.canvas.getBoundingClientRect();
-          const relY = (touchStartY - rect.top) / rect.height;
-          if (relY < 0.55) this.handleJump();
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const elapsed = Date.now() - touchStartTime;
+
+        if (Math.abs(deltaY) > 25 && Math.abs(deltaY) > Math.abs(deltaX)) {
+          if (deltaY < 0) this.handleJump();
           else this.handleSlide();
+        } else if (elapsed < 350 && Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) {
+          const target = e.target;
+          if (target && (target.closest(".control-btn") || target.closest(".hud-btn") || target.closest(".primary-btn"))) {
+            return;
+          }
+          const tapY = e.changedTouches[0].clientY;
+          if (tapY < window.innerHeight * 0.55) {
+            this.handleJump();
+          } else {
+            this.handleSlide();
+          }
         }
       }
     }, { passive: true });
@@ -396,9 +433,9 @@ class GuyemGame {
       const text = GENTLE_WORDS[Math.floor(Math.random() * GENTLE_WORDS.length)];
       this.obstacles.push({
         x: CANVAS_WIDTH + 20,
-        y: GROUND_Y - 110,
-        width: 150,
-        height: 48,
+        y: GROUND_Y - 95,
+        width: 145,
+        height: 44,
         isHigh: false,
         text: text,
         passed: false,
@@ -412,11 +449,15 @@ class GuyemGame {
       ? HIGH_WORDS[Math.floor(Math.random() * HIGH_WORDS.length)]
       : LOW_WORDS[Math.floor(Math.random() * LOW_WORDS.length)];
 
-    const width = 140;
+    const width = 135;
     const height = 44;
-    // High arrow is way up at GROUND_Y - 165 (80px clearance over sliding player)
-    // Low arrow is down at GROUND_Y - 44 (huge clearance over jumping player)
-    const y = isHigh ? GROUND_Y - 165 : GROUND_Y - 44;
+    // High obstacle:
+    // Standing Guyem: y in [320, 430] -> overlaps [314, 358] by 38px -> MUST SLIDE!
+    // Sliding Guyem: y in [385, 430] -> clearance of 27px below 358 -> SAFELY PASSES!
+    // Low obstacle:
+    // Ground level: y in [388, 430] -> Standing/Sliding hits -> MUST JUMP!
+    // Jumping Guyem rises to y=174 -> clears by 214px!
+    const y = isHigh ? GROUND_Y - 116 : GROUND_Y - 42;
 
     this.obstacles.push({
       x: CANVAS_WIDTH + 20,
@@ -455,16 +496,16 @@ class GuyemGame {
   }
 
   checkCollision(guyem, obs) {
-    const margin = 14;
-    const gx = guyem.x + margin;
-    const gy = guyem.y + margin;
-    const gw = (guyem.isSliding ? 120 : guyem.width) - margin * 2;
-    const gh = guyem.height - margin * 2;
-
-    const ox = obs.x + 8;
+    // Horizontally: give generous 18px inward margin on obstacle so landing near edges is clean
+    const ox = obs.x + 18;
+    const ow = obs.width - 36;
     const oy = obs.y + 4;
-    const ow = obs.width - 16;
     const oh = obs.height - 8;
+
+    const gx = guyem.x + 15;
+    const gw = (guyem.isSliding ? 110 : guyem.width) - 30;
+    const gy = guyem.y + 8;
+    const gh = guyem.height - 16;
 
     return (
       gx < ox + ow &&
@@ -547,10 +588,25 @@ class GuyemGame {
 
   triggerGentleReminder() {
     const banner = document.getElementById("reminder-banner");
-    banner.classList.add("active");
-    window.soundManager.playGentleReminder(() => {
-      setTimeout(() => banner.classList.remove("active"), 3500);
-    });
+    if (banner) banner.classList.add("active");
+    try {
+      if (window.soundManager && typeof window.soundManager.playGentleReminder === "function") {
+        window.soundManager.playGentleReminder(() => {
+          setTimeout(() => {
+            if (banner) banner.classList.remove("active");
+          }, 3500);
+        });
+      } else {
+        setTimeout(() => {
+          if (banner) banner.classList.remove("active");
+        }, 3500);
+      }
+    } catch (e) {
+      console.warn("Gentle reminder sound error:", e);
+      setTimeout(() => {
+        if (banner) banner.classList.remove("active");
+      }, 3500);
+    }
   }
 
   triggerInterruptionClimax() {
@@ -571,12 +627,19 @@ class GuyemGame {
 
   triggerVictoryHug() {
     this.state = "VICTORY";
-    window.soundManager.stopBGM();
-    window.soundManager.playVictoryFanfare();
-    if (navigator.vibrate) navigator.vibrate([100, 100, 100, 100, 300]);
+    try {
+      if (window.soundManager) {
+        if (typeof window.soundManager.stopBGM === "function") window.soundManager.stopBGM();
+        if (typeof window.soundManager.playVictoryFanfare === "function") window.soundManager.playVictoryFanfare();
+      }
+    } catch (e) {
+      console.warn("Victory sound error:", e);
+    }
+
+    if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 300]);
 
     const overlay = document.getElementById("victory-overlay");
-    overlay.classList.add("active");
+    if (overlay) overlay.classList.add("active");
   }
 
   showReflectionModal() {
@@ -673,35 +736,52 @@ class GuyemGame {
     this.obstacles.forEach((obs) => {
       ctx.save();
 
-      // Sharp, crystal-clear speech bubble with pointing arrow
-      ctx.fillStyle = obs.isGentle ? "#fdf2f8" : "#fef08a";
-      ctx.strokeStyle = obs.isGentle ? "#db2777" : "#991b1b";
-      ctx.lineWidth = 3;
+      const isGentle = obs.isGentle;
+      const bgGrad = ctx.createLinearGradient(obs.x, obs.y, obs.x, obs.y + obs.height);
+      if (isGentle) {
+        bgGrad.addColorStop(0, "#ec4899");
+        bgGrad.addColorStop(1, "#be185d");
+      } else {
+        bgGrad.addColorStop(0, "#ef4444");
+        bgGrad.addColorStop(1, "#b91c1c");
+      }
+
+      ctx.fillStyle = bgGrad;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2.5;
 
       ctx.beginPath();
-      ctx.roundRect(obs.x + 8, obs.y, obs.width - 8, obs.height, 12);
+      if (ctx.roundRect) {
+        ctx.roundRect(obs.x + 8, obs.y, obs.width - 8, obs.height, 12);
+      } else {
+        ctx.rect(obs.x + 8, obs.y, obs.width - 8, obs.height);
+      }
       ctx.fill();
       ctx.stroke();
 
       // Left arrow pointer
       ctx.beginPath();
       ctx.moveTo(obs.x + 10, obs.y + obs.height / 2 - 8);
-      ctx.lineTo(obs.x - 2, obs.y + obs.height / 2);
+      ctx.lineTo(obs.x - 3, obs.y + obs.height / 2);
       ctx.lineTo(obs.x + 10, obs.y + obs.height / 2 + 8);
       ctx.closePath();
-      ctx.fillStyle = obs.isGentle ? "#db2777" : "#991b1b";
+      ctx.fillStyle = isGentle ? "#be185d" : "#b91c1c";
       ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-      // Bold 17px text - 100% Crisp & Legible!
-      ctx.font = "bold 17px -apple-system, BlinkMacSystemFont, Arial, sans-serif";
+      // Bold white text with subtle dark shadow - 100% Crisp & High Contrast!
+      ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
+
+      ctx.font = "900 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 3;
-      ctx.strokeText(obs.text, obs.x + obs.width / 2 + 4, obs.y + obs.height / 2);
-
-      ctx.fillStyle = obs.isGentle ? "#831843" : "#450a0a";
+      ctx.fillStyle = "#ffffff";
       ctx.fillText(obs.text, obs.x + obs.width / 2 + 4, obs.y + obs.height / 2);
 
       ctx.restore();

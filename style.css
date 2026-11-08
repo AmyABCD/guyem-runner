@@ -491,3 +491,63 @@ canvas#gameCanvas {
   filter: drop-shadow(0 8px 25px rgba(244, 63, 94, 0.6));
   margin-bottom: 10px;
 }
+
+/* ================= Compact Landscape Screens (height <= 420px) ================= */
+@media (max-height: 420px) {
+  .modal-card {
+    padding: 8px 14px !important;
+    max-width: 440px !important;
+    border-radius: 14px !important;
+    max-height: 98vh !important;
+  }
+  .modal-top-row {
+    margin-bottom: 4px !important;
+    gap: 8px !important;
+  }
+  .modal-mascot-img {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  .modal-title {
+    font-size: 16px !important;
+  }
+  .modal-subtitle {
+    font-size: 10.5px !important;
+  }
+  .rules-grid {
+    margin: 6px 0 8px !important;
+    gap: 6px !important;
+  }
+  .rule-card {
+    padding: 5px 8px !important;
+  }
+  .rule-badge {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+    margin-bottom: 2px !important;
+  }
+  .rule-desc {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+  .primary-btn {
+    padding: 7px 16px !important;
+    font-size: 13px !important;
+  }
+  .control-btn {
+    width: 95px !important;
+    height: 52px !important;
+    border-radius: 12px !important;
+  }
+  .control-btn .btn-icon {
+    font-size: 18px !important;
+  }
+  .control-btn .btn-text {
+    font-size: 11px !important;
+  }
+  .hug-image {
+    width: 90px !important;
+    height: 90px !important;
+    margin-bottom: 6px !important;
+  }
+}
