@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Сургалтын Оролцогчийн Бүртгэл - ICAN</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0b101b; color: #f8fafc; min-height: 100vh; padding: 20px 16px 60px; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 540px; }
+    
+    .header-card { text-align: center; background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(56, 189, 248, 0.35); border-radius: 24px; padding: 24px 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .header-badge { display: inline-block; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    h1 { font-size: 22px; font-weight: 900; margin-bottom: 8px; color: #ffffff; }
+    p.subtitle { font-size: 13px; color: #94a3b8; line-height: 1.45; }
+    
+    .card { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 18px; margin-bottom: 14px; backdrop-filter: blur(10px); }
+    .card-label { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .required { color: #f43f5e; margin-left: 2px; }
+    
+    input[type="text"], input[type="tel"], input[type="email"], select {
+      width: 100%; background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px 14px; color: #ffffff; font-size: 14.5px; outline: none; transition: border-color 0.2s, background 0.2s;
+    }
+    input:focus, select:focus { border-color: #38bdf8; background: rgba(0, 0, 0, 0.6); }
+    select option { background: #0f172a; color: #fff; }
+    
+    .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
+    .role-chip { background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; font-size: 12.5px; font-weight: 700; color: #cbd5e1; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .role-chip.active { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #38bdf8; font-weight: 800; }
+    
+    .submit-btn { width: 100%; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 18px; color: #ffffff; font-size: 16px; font-weight: 900; padding: 16px; cursor: pointer; letter-spacing: 0.5px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); margin-top: 10px; transition: transform 0.15s; }
+    .submit-btn:active { transform: scale(0.97); }
+
+    /* Success Modal */
+    #success-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.92); backdrop-filter: blur(12px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+    .success-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #10b981; border-radius: 28px; padding: 32px 24px; text-align: center; max-width: 440px; box-shadow: 0 0 50px rgba(16, 185, 129, 0.3); }
+    .success-icon { font-size: 60px; margin-bottom: 14px; animation: popIcon 0.4s ease-out; }
+    @keyframes popIcon { 0% { transform: scale(0.4); } 100% { transform: scale(1); } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-card">
+    <div class="header-badge">ICAN СУРГАЛТ</div>
+    <h1>Сургалтын Оролцогчийн Бүртгэл</h1>
+    <p class="subtitle">Сургалтад хүрэлцэн ирсэнд баярлалаа! Ирц, бүртгэл болон цаашдын хамтын ажиллагаанд зориулан мэдээллээ бүртгүүлнэ үү.</p>
+  </div>
+
+  <form id="register-form">
+    <!-- 1. Organization / School -->
+    <div class="card">
+      <label class="card-label">
+        <span>🏢</span> <span>Байгууллага / Сургууль, цэцэрлэг:</span> <span class="required">*</span>
+      </label>
+      <input type="text" id="org_name" placeholder="Жишээ нь: 1-р сургууль, Дархан 2-р цэцэрлэг..." required>
+    </div>
+
+    <!-- 2. Last Name & First Name -->
+    <div class="card">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div>
+          <label class="card-label">
+            <span>👤</span> <span>Овог:</span> <span class="required">*</span>
+          </label>
+          <input type="text" id="last_name" placeholder="Овог" required>
+        </div>
+        <div>
+          <label class="card-label">
+            <span>👤</span> <span>Нэр:</span> <span class="required">*</span>
+          </label>
+          <input type="text" id="first_name" placeholder="Нэр" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Phone Number -->
+    <div class="card">
+      <label class="card-label">
+        <span>📞</span> <span>Утасны дугаар:</span> <span class="required">*</span>
+      </label>
+      <input type="tel" id="phone" placeholder="Жишээ нь: 9911-XXXX" required>
+    </div>
+
+    <!-- 4. Position / Role -->
+    <div class="card">
+      <label class="card-label">
+        <span>💼</span> <span>Таны оролцооны хэлбэр / Албан тушаал:</span> <span class="required">*</span>
+      </label>
+      <div class="role-grid">
+        <div class="role-chip active" data-role="Эцэг эх / Асран хамгаалагч">👨‍👩‍👧 Эцэг эх</div>
+        <div class="role-chip" data-role="Багш / Сурган хүмүүжүүлэгч">👩‍🏫 Багш</div>
+        <div class="role-chip" data-role="Удирдах ажилтан">👔 Удирдах ажилтан</div>
+        <div class="role-chip" data-role="Бусад">✨ Бусад</div>
+      </div>
+      <input type="text" id="custom_role" placeholder="Албан тушаалаа бичнэ үү..." style="margin-top:10px; display:none;">
+    </div>
+
+    <!-- 5. Email (Optional) -->
+    <div class="card">
+      <label class="card-label">
+        <span>✉️</span> <span>Имэйл хаяг / Холбоо барих:</span>
+      </label>
+      <input type="email" id="email" placeholder="Жишээ нь: name@example.com">
+    </div>
+
+    <button type="submit" id="btn-submit" class="submit-btn">БҮРТГҮҮЛЭХ (Илгээх) 🚀</button>
+  </form>
+</div>
+
+<!-- Success Confirmation Modal -->
+<div id="success-modal">
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <h2 style="font-size:22px; color:#fff; margin-bottom:8px;">Бүртгэл Амжилттай!</h2>
+    <p style="font-size:14px; color:#94a3b8; line-height:1.5; margin-bottom:20px;">
+      Таны мэдээлэл сургагч багшид амжилттай бүртгэгдлээ. Сургалтад тавтай морилно уу! ❤️
+    </p>
+    <button onclick="document.getElementById('success-modal').style.display='none'" class="submit-btn" style="padding:12px 24px; font-size:15px; background:linear-gradient(135deg, #10b981, #059669);">Ойлголоо</button>
+  </div>
+</div>
+
+<script>
+  let selectedRole = "Эцэг эх / Асран хамгаалагч";
+
+  // Check URL params for pre-filling location (e.g. ?loc=1-р_сургууль)
+  const urlParams = new URLSearchParams(window.location.search);
+  const locParam = urlParams.get('loc') || urlParams.get('session');
+  const whParam = urlParams.get('wh');
+  if (whParam) {
+    try { localStorage.setItem('ican_google_webhook_url', decodeURIComponent(whParam)); } catch(e) {}
+  }
+  if (locParam) {
+    document.getElementById('org_name').value = decodeURIComponent(locParam);
+  } else {
+    // If trainer set active session in localStorage
+    const savedActive = localStorage.getItem('ican_active_session_name');
+    if (savedActive) {
+      document.getElementById('org_name').value = savedActive;
+    }
+  }
+
+  // Role chip selection
+  document.querySelectorAll('.role-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.role-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedRole = chip.dataset.role;
+      const customInput = document.getElementById('custom_role');
+      if (selectedRole === 'Бусад') {
+        customInput.style.display = 'block';
+        customInput.focus();
+      } else {
+        customInput.style.display = 'none';
+      }
+    });
+  });
+
+  // Submit Handler
+  document.getElementById('register-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const org = document.getElementById('org_name').value.trim();
+    const lastName = document.getElementById('last_name').value.trim();
+    const firstName = document.getElementById('first_name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    
+    let role = selectedRole;
+    if (role === 'Бусад') {
+      const custom = document.getElementById('custom_role').value.trim();
+      if (custom) role = custom;
+    }
+
+    const regData = {
+      id: Date.now(),
+      org: org,
+      lastName: lastName,
+      firstName: firstName,
+      fullName: `${lastName} ${firstName}`,
+      phone: phone,
+      role: role,
+      email: email,
+      session_location: org,
+      submittedAt: new Date().toLocaleString('mn-MN')
+    };
+
+    // 1. Save locally
+    saveRegistration(regData);
+
+    // 2. Dispatch to FormSubmit (instant email notification to adiya.khishigbayar@gmail.com)
+    try {
+      fetch('https://formsubmit.co/ajax/adiya.khishigbayar@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `📋 Шинэ оролцогчийн бүртгэл: [${org}] - ${lastName} ${firstName}`,
+          _template: 'table',
+          _captcha: 'false',
+          'Байгууллага_Сургууль': org,
+          'Овог_Нэр': `${lastName} ${firstName}`,
+          'Утасны_дугаар': phone,
+          'Албан_тушаал_Оролцоо': role,
+          'Имэйл': email || 'Оруулаагүй',
+          'Бүртгэсэн_Огноо': regData.submittedAt
+        })
+      }).catch(err => console.warn('FormSubmit network note:', err));
+    } catch(e) {}
+
+    // 3. Optional Google Sheets Webhook sync
+    const webhookUrl = localStorage.getItem('ican_google_webhook_url');
+    if (webhookUrl) {
+      try {
+        fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'registration', ...regData })
+        }).catch(() => {});
+      } catch(e) {}
+    }
+
+    // Show confirmation modal
+    document.getElementById('success-modal').style.display = 'flex';
+    document.getElementById('btn-submit').disabled = true;
+    document.getElementById('btn-submit').textContent = 'Бүртгэгдсэн ✅';
+  });
+
+  const REG_STORAGE_KEY = 'ican_training_registrations';
+
+  function saveRegistration(item) {
+    try {
+      const list = JSON.parse(localStorage.getItem(REG_STORAGE_KEY) || '[]');
+      list.unshift(item);
+      localStorage.setItem(REG_STORAGE_KEY, JSON.stringify(list));
+    } catch(e) {
+      console.warn('Storage save note:', e);
+    }
+  }
+</script>
+
+</body>
+</html>

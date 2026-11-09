@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Сургагч Багшийн Хяналтын Самбар - ICAN</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { background: #0b101b; color: #f8fafc; min-height: 100vh; padding: 20px 16px 60px; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 760px; }
+    
+    /* Login Overlay */
+    #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b101b; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8); }
+    .login-badge { display: inline-block; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 16px; margin-bottom: 12px; }
+    .login-title { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+    .login-desc { font-size: 12.5px; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; }
+    .input-group { text-align: left; margin-bottom: 14px; }
+    .input-label { font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; display: block; }
+    .input-field { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px 14px; color: #fff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .input-field:focus { border-color: #38bdf8; }
+    .btn-login { width: 100%; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 14px; color: #fff; font-size: 15px; font-weight: 800; padding: 13px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+    .login-error { color: #ef4444; font-size: 12px; margin-top: 10px; display: none; font-weight: 600; }
+    
+    /* Header Card */
+    .header-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; }
+    .trainer-info { display: flex; flex-direction: column; gap: 2px; }
+    .trainer-badge { font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .trainer-email { font-size: 15px; font-weight: 800; color: #fff; }
+    .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; }
+    
+    /* Session / Location Controller */
+    .session-panel { background: rgba(15, 23, 42, 0.8); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 18px; padding: 16px 18px; margin-bottom: 16px; }
+    .session-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+    .session-title-box { display: flex; align-items: center; gap: 8px; }
+    .session-dot { width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981; }
+    .session-name { font-size: 15px; font-weight: 800; color: #a7f3d0; }
+    .session-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-new-session { background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: #fff; font-size: 12.5px; font-weight: 800; padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+    .select-session { background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #fff; font-size: 12.5px; padding: 7px 10px; outline: none; }
+    .select-session option { background: #0f172a; color: #fff; }
+    
+    /* Tabs Navigation */
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px; }
+    .tab-btn { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 12px; font-size: 13.5px; font-weight: 800; color: #94a3b8; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .tab-btn.active { background: rgba(56, 189, 248, 0.18); border-color: #38bdf8; color: #38bdf8; }
+    
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 12px 10px; text-align: center; }
+    .stat-val { font-size: 22px; font-weight: 900; color: #38bdf8; }
+    .stat-label { font-size: 10.5px; color: #94a3b8; font-weight: 700; margin-top: 3px; }
+    
+    /* Action Bar */
+    .action-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .btn-download { flex: 2; min-width: 180px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 12px; color: #fff; font-size: 13.5px; font-weight: 800; padding: 12px 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+    .btn-qr-view { flex: 1; min-width: 140px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.2); border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    
+    /* Cards & Lists */
+    .card { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px; padding: 18px; margin-bottom: 16px; }
+    .card-title { font-size: 14.5px; font-weight: 800; color: #e2e8f0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .item-box { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; font-size: 13px; }
+    .item-meta { display: flex; justify-content: space-between; color: #38bdf8; font-weight: 700; margin-bottom: 6px; font-size: 12px; }
+    .item-row { margin-bottom: 4px; color: #cbd5e1; }
+    .item-row strong { color: #f1f5f9; }
+    .empty-state { text-align: center; padding: 30px; color: #64748b; font-size: 14px; line-height: 1.5; }
+    
+    /* Modal styles */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .modal-box { background: #1e293b; border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 22px; max-width: 480px; width: 100%; text-align: center; }
+    
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 1. Password Protected Login Gate -->
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="login-badge">ЗӨВХӨН ЭРХ БҮХИЙ ХЭРЭГЛЭГЧ</div>
+    <h1 class="login-title">Сургагч Багшийн Нэвтрэх</h1>
+    <p class="login-desc">Сургалтын ирц бүртгэл болон сэтгэл ханамжийн тайланг зөвхөн баталгаажсан сургагч багш үзэх, татах эрхтэй.</p>
+    
+    <div class="input-group">
+      <label class="input-label">Зөвшөөрөгдсөн имэйл хаяг:</label>
+      <input type="email" id="login-email" class="input-field" value="adiya.khishigbayar@gmail.com" readonly style="background:rgba(0,0,0,0.6); color:#94a3b8;">
+    </div>
+    
+    <div class="input-group">
+      <label class="input-label">Нууц PIN код:</label>
+      <input type="password" id="login-pin" class="input-field" placeholder="PIN кодоо оруулна уу" autofocus>
+    </div>
+    
+    <button id="btn-login-submit" class="btn-login">НЭВТРЭХ 🚀</button>
+    <div id="login-error-msg" class="login-error">Нууц PIN код буруу байна! Дахин оролдоно уу.</div>
+  </div>
+</div>
+
+<!-- 2. Main Admin Dashboard -->
+<div class="container" id="admin-container" style="display:none;">
+  
+  <!-- Header -->
+  <div class="header-card">
+    <div class="trainer-info">
+      <span class="trainer-badge">СУРГАГЧ БАГШ / АДМИН</span>
+      <span class="trainer-email">adiya.khishigbayar@gmail.com</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button id="btn-settings" class="btn-logout" style="border-color:#38bdf8; color:#38bdf8; background:rgba(56,189,248,0.15); cursor:pointer;">⚙️ Тохиргоо</button>
+      <button id="btn-logout" class="btn-logout">Гарах</button>
+    </div>
+  </div>
+
+  <!-- Session / Location Controller (Never mixes up across schools!) -->
+  <div class="session-panel">
+    <div class="session-top">
+      <div class="session-title-box">
+        <div class="session-dot"></div>
+        <div>
+          <span style="font-size:11px; color:#94a3b8; display:block;">ОДОО ИДЭВХТЭЙ СУРГАЛТ:</span>
+          <span id="active-session-label" class="session-name">1-р сургууль (2026-11-09)</span>
+        </div>
+      </div>
+      <div class="session-actions">
+        <select id="session-selector" class="select-session">
+          <option value="ACTIVE">🟢 Одоо идэвхтэй сургалт</option>
+          <option value="ALL">📁 Бүх түүхэн сургалтууд (Нийт)</option>
+        </select>
+        <button id="btn-sync-cloud" class="select-session" style="border-color:#38bdf8; color:#38bdf8; cursor:pointer; display:none;">🔄 Шинэчлэх</button>
+        <button id="btn-start-new-session" class="btn-new-session">✨ Шинэ сургалт эхлүүлэх</button>
+      </div>
+    </div>
+    <div style="font-size:12px; color:#94a3b8;">
+      💡 <em>Өөр газар очиж сургалт явуулахдаа "Шинэ сургалт эхлүүлэх" товчийг дарснаар өмнөх сургалтын бүртгэл, санал асуулгатай холилдохгүй тусдаа шинээр эхэлнэ.</em>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="nav-tabs">
+    <div id="tab-reg-btn" class="tab-btn active">📋 1. Оролцогчдын Бүртгэл / Ирц</div>
+    <div id="tab-survey-btn" class="tab-btn">📊 2. Сэтгэл Ханамжийн Санал Асуулга</div>
+  </div>
+
+  <!-- TAB 1: REGISTRATIONS / ATTENDANCE -->
+  <div id="tab-reg-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div id="reg-stat-total" class="stat-val">0</div>
+        <div class="stat-label">НИЙТ БҮРТГҮҮЛСЭН</div>
+      </div>
+      <div class="stat-card">
+        <div id="reg-stat-parents" class="stat-val">0</div>
+        <div class="stat-label">ЭЦЭГ ЭХЧҮҮД</div>
+      </div>
+      <div class="stat-card">
+        <div id="reg-stat-teachers" class="stat-val">0</div>
+        <div class="stat-label">БАГШ НАР</div>
+      </div>
+      <div class="stat-card">
+        <div id="reg-stat-others" class="stat-val">0</div>
+        <div class="stat-label">БУСАД / УДИРДЛАГА</div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button id="btn-download-reg-csv" class="btn-download">
+        <span>📥</span> <span>Бүртгэлийн жагсаалт татах (CSV / Excel)</span>
+      </button>
+      <button id="btn-show-reg-qr" class="btn-qr-view">
+        <span>📱</span> <span>Бүртгэлийн QR харах</span>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Бүртгүүлсэн оролцогчдын жагсаалт</span>
+        <span id="reg-count-badge" style="font-size:12px; color:#38bdf8; font-weight:700;">0 хүн</span>
+      </div>
+      <div id="reg-list-container">
+        <div class="empty-state">Энэ сургалтад бүртгүүлсэн оролцогч одоогоор алга байна.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: SATISFACTION SURVEY -->
+  <div id="tab-survey-content" style="display:none;">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div id="survey-stat-count" class="stat-val">0</div>
+        <div class="stat-label">САНАЛ ӨГСӨН</div>
+      </div>
+      <div class="stat-card">
+        <div id="survey-stat-avg" class="stat-val">5.0 ⭐</div>
+        <div class="stat-label">ДУНДАЖ ҮНЭЛГЭЭ</div>
+      </div>
+      <div class="stat-card">
+        <div id="survey-stat-risk" class="stat-val">100%</div>
+        <div class="stat-label">ЭРСДЭЛ ТАНИЛТ</div>
+      </div>
+      <div class="stat-card">
+        <div id="survey-stat-game" class="stat-val">100%</div>
+        <div class="stat-label">ТОГЛООМЫН ӨГӨӨЖ</div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button id="btn-download-survey-csv" class="btn-download">
+        <span>📥</span> <span>Санал асуулгын тайлан татах (CSV / Excel)</span>
+      </button>
+      <button id="btn-show-survey-qr" class="btn-qr-view">
+        <span>📱</span> <span>Санал асуулгын QR харах</span>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Эцэг эхчүүдийн үнэлгээ, бичсэн саналууд</span>
+        <span id="survey-count-badge" style="font-size:12px; color:#38bdf8; font-weight:700;">0 санал</span>
+      </div>
+      <div id="survey-list-container">
+        <div class="empty-state">Энэ сургалтад ирсэн санал асуулга одоогоор алга байна.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: New Session Creation -->
+<div id="new-session-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h2 style="font-size:18px; color:#fff; margin-bottom:8px;">✨ Шинэ сургалт эхлүүлэх</h2>
+    <p style="font-size:12.5px; color:#94a3b8; margin-bottom:16px;">
+      Өмнөх сургалтын бүртгэл болон үнэлгээг аюулгүй архивлаж, дараагийн байршил/сургуулийн мэдээллийг шинээр авч эхэлнэ.
+    </p>
+    <div class="input-group">
+      <label class="input-label">Шинэ сургалтын байршил / Сургуулийн нэр:</label>
+      <input type="text" id="new-session-input" class="input-field" placeholder="Жишээ нь: 23-р сургууль, Дархан 5-р цэцэрлэг...">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button onclick="document.getElementById('new-session-modal').style.display='none'" class="select-session" style="flex:1; padding:10px;">Болих</button>
+      <button id="btn-confirm-new-session" class="btn-new-session" style="flex:2; justify-content:center; padding:10px;">Эхлүүлэх</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: QR Code & Link Viewer -->
+<div id="qr-modal" class="modal-overlay">
+  <div class="modal-box">
+    <h2 id="qr-modal-title" style="font-size:18px; color:#fff; margin-bottom:6px;">📱 QR Код</h2>
+    <p id="qr-modal-desc" style="font-size:12px; color:#94a3b8; margin-bottom:14px;">Оролцогчдод утсаараа уншуулах холбоос:</p>
+    
+    <div style="background:#fff; padding:16px; border-radius:16px; display:inline-block; margin-bottom:12px;">
+      <img id="qr-img" src="" alt="QR" style="width:180px; height:180px; display:block;">
+    </div>
+    
+    <div style="font-size:12px; color:#38bdf8; word-break:break-all; margin-bottom:16px; background:rgba(0,0,0,0.3); padding:8px; border-radius:8px;" id="qr-link-text">
+    </div>
+    
+    <button onclick="document.getElementById('qr-modal').style.display='none'" class="btn-download" style="width:100%;">Хаах</button>
+  </div>
+</div>
+
+<!-- Modal: Admin Settings (PIN & Google Sheets Sync) -->
+<div id="settings-modal" class="modal-overlay">
+  <div class="modal-box" style="text-align:left; max-height:90vh; overflow-y:auto;">
+    <h2 style="font-size:18px; color:#fff; margin-bottom:8px; text-align:center;">⚙️ Админ Тохиргоо & Нууцлал</h2>
+    <p style="font-size:12px; color:#94a3b8; margin-bottom:16px; text-align:center;">
+      Бүх санал асуулга болон бүртгэл зөвхөн <strong>adiya.khishigbayar@gmail.com</strong> хаяг руу шууд илгээгдэнэ.
+    </p>
+
+    <!-- PIN Change -->
+    <div style="background:rgba(0,0,0,0.25); padding:14px; border-radius:14px; margin-bottom:14px; border:1px solid rgba(255,255,255,0.08);">
+      <label class="input-label">🔑 Админ нэвтрэх PIN код солих:</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="setting-new-pin" class="input-field" placeholder="Шинэ PIN (Жишээ нь: 2026)" style="flex:1; padding:10px 12px;">
+        <button id="btn-save-pin" class="btn-new-session" style="padding:10px 16px;">Хадгалах</button>
+      </div>
+      <div style="font-size:11px; color:#64748b; margin-top:6px;">Анхны PIN код: <strong>2026</strong></div>
+    </div>
+
+    <!-- Google Sheets Webhook -->
+    <div style="background:rgba(0,0,0,0.25); padding:14px; border-radius:14px; margin-bottom:14px; border:1px solid rgba(56,189,248,0.2);">
+      <label class="input-label">📊 Google Sheets-рүү шууд дамжуулах (Нэмэлт Webhook URL):</label>
+      <input type="url" id="setting-webhook-url" class="input-field" placeholder="https://script.google.com/macros/s/.../exec" style="padding:10px 12px; margin-bottom:8px;">
+      <div style="display:flex; gap:8px;">
+        <button id="btn-save-webhook" class="btn-download" style="flex:1; padding:9px; font-size:12.5px;">URL Хадгалах</button>
+        <button id="btn-toggle-script-guide" class="select-session" style="padding:9px 12px; font-size:12px;">📜 Apps Script Заавар</button>
+      </div>
+
+      <div id="script-guide-box" style="display:none; margin-top:12px; font-size:11.5px; color:#cbd5e1; line-height:1.45;">
+        <p style="margin-bottom:6px; color:#38bdf8; font-weight:700;">Google Sheet холбох 1 минутын заавар:</p>
+        <ol style="padding-left:16px; margin-bottom:8px;">
+          <li>Өөрийн Google Drive дээр шинэ <strong>Google Sheet</strong> нээнэ.</li>
+          <li><strong>Extensions &rarr; Apps Script</strong> цэс рүү орно.</li>
+          <li>Доорх кодыг хуулж тавиад <strong>Deploy &rarr; New deployment &rarr; Web app</strong> (Who has access: <strong>Anyone</strong>) болгож үүсгээд холбоосыг нь дээр хуулна.</li>
+        </ol>
+        <pre id="apps-script-code" style="background:#090d16; padding:10px; border-radius:8px; font-size:10.5px; color:#a7f3d0; overflow-x:auto; white-space:pre-wrap;">function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  var sheetName = data.type === 'registration' ? 'Burtgel' : 'Sudalgaa';
+  var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+  if (sheet.getLastRow() === 0) {
+    if (data.type === 'registration') {
+      sheet.appendRow(['Огноо','Байгууллага','Овог','Нэр','Утас','Оролцоо','Имэйл','ID']);
+    } else {
+      sheet.appendRow(['Огноо','Байршил','Нэр','Утас','Үнэлгээ','Эрсдэл','ШинэАрга','Тоглоом','Шийдвэр','Санал','ID']);
+    }
+  }
+  if (data.type === 'registration') {
+    sheet.appendRow([data.submittedAt, data.org, data.lastName, data.firstName, data.phone, data.role, data.email, data.id]);
+  } else {
+    sheet.appendRow([data.submittedAt, data.session_location, data.participant_name, data.participant_phone, data.q1_overall, data.q2_risk, data.q3_communication, data.q4_game, data.q5_action, data.q6_feedback, data.id]);
+  }
+  return ContentService.createTextOutput("OK");
+}
+
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var regSheet = ss.getSheetByName('Burtgel');
+  var srvSheet = ss.getSheetByName('Sudalgaa');
+  var regs = regSheet && regSheet.getLastRow() > 1 ? regSheet.getDataRange().getValues().slice(1) : [];
+  var srvs = srvSheet && srvSheet.getLastRow() > 1 ? srvSheet.getDataRange().getValues().slice(1) : [];
+  return ContentService.createTextOutput(JSON.stringify({ registrations: regs, surveys: srvs }))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        <button id="btn-copy-script" class="select-session" style="margin-top:6px; width:100%; padding:7px;">📋 Код хуулах</button>
+      </div>
+    </div>
+
+    <!-- Email Activation Info -->
+    <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); padding:10px 12px; border-radius:12px; font-size:11.5px; color:#a7f3d0; margin-bottom:14px;">
+      ✉️ <strong>Имэйл мэдэгдэл:</strong> Эхний туршилтын бүртгэл эсвэл санал асуулга илгээсний дараа <code>adiya.khishigbayar@gmail.com</code> имэйл дээрээ <strong>"Activate Form"</strong> товчийг 1 удаа дарж баталгаажуулаарай.
+    </div>
+
+    <button onclick="document.getElementById('settings-modal').style.display='none'" class="btn-download" style="width:100%;">Хаах</button>
+  </div>
+</div>
+
+<script>
+  const AUTHORIZED_EMAIL = "adiya.khishigbayar@gmail.com";
+  const DEFAULT_PIN = "2026";
+  const PIN_KEY = "ican_admin_pin";
+  const ACTIVE_SESSION_KEY = "ican_active_session_name";
+  const REG_STORAGE_KEY = "ican_training_registrations";
+  const SURVEY_STORAGE_KEY = "ican_training_survey_responses";
+
+  // Login verification
+  function getStoredPIN() {
+    return localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+  }
+
+  function isLoggedIn() {
+    return sessionStorage.getItem("ican_admin_auth") === "true";
+  }
+
+  function setLoggedIn(val) {
+    if (val) sessionStorage.setItem("ican_admin_auth", "true");
+    else sessionStorage.removeItem("ican_admin_auth");
+  }
+
+  function getActiveSession() {
+    return localStorage.getItem(ACTIVE_SESSION_KEY) || ("Сургалт - " + new Date().toISOString().slice(0, 10));
+  }
+
+  function setActiveSession(name) {
+    localStorage.setItem(ACTIVE_SESSION_KEY, name);
+  }
+
+  function getAllRegistrations() {
+    try {
+      return JSON.parse(localStorage.getItem(REG_STORAGE_KEY) || "[]");
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function getAllSurveys() {
+    try {
+      return JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || "[]");
+    } catch(e) {
+      return [];
+    }
+  }
+
+  // Login handler
+  document.getElementById("btn-login-submit").addEventListener("click", () => {
+    const enteredPIN = document.getElementById("login-pin").value.trim();
+    if (enteredPIN === getStoredPIN()) {
+      setLoggedIn(true);
+      document.getElementById("login-overlay").style.display = "none";
+      document.getElementById("admin-container").style.display = "block";
+      initAdminDashboard();
+    } else {
+      document.getElementById("login-error-msg").style.display = "block";
+    }
+  });
+
+  document.getElementById("login-pin").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("btn-login-submit").click();
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    setLoggedIn(false);
+    window.location.reload();
+  });
+
+  // Tab Switching
+  const tabRegBtn = document.getElementById("tab-reg-btn");
+  const tabSurveyBtn = document.getElementById("tab-survey-btn");
+  const tabRegContent = document.getElementById("tab-reg-content");
+  const tabSurveyContent = document.getElementById("tab-survey-content");
+
+  tabRegBtn.addEventListener("click", () => {
+    tabRegBtn.classList.add("active");
+    tabSurveyBtn.classList.remove("active");
+    tabRegContent.style.display = "block";
+    tabSurveyContent.style.display = "none";
+  });
+
+  tabSurveyBtn.addEventListener("click", () => {
+    tabSurveyBtn.classList.add("active");
+    tabRegBtn.classList.remove("active");
+    tabSurveyContent.style.display = "block";
+    tabRegContent.style.display = "none";
+  });
+
+  // Dashboard Init
+  function initAdminDashboard() {
+    updateSessionUI();
+    renderAllData();
+    const wh = localStorage.getItem("ican_google_webhook_url");
+    const syncBtn = document.getElementById("btn-sync-cloud");
+    if (wh && wh.trim()) {
+      syncBtn.style.display = "inline-block";
+      syncFromGoogleSheets(false);
+    } else {
+      syncBtn.style.display = "none";
+    }
+  }
+
+  async function syncFromGoogleSheets(isManual) {
+    const wh = localStorage.getItem("ican_google_webhook_url");
+    if (!wh || !wh.trim()) return;
+    const syncBtn = document.getElementById("btn-sync-cloud");
+    const oldText = syncBtn.textContent;
+    syncBtn.textContent = "⏳ Татаж байна...";
+    try {
+      const res = await fetch(wh.trim());
+      const data = await res.json();
+      if (data && Array.isArray(data.registrations)) {
+        const localRegs = getAllRegistrations();
+        const existingKeys = new Set(localRegs.map(r => `${r.id || ''}_${r.phone || ''}_${r.submittedAt || ''}`));
+        data.registrations.forEach(row => {
+          const item = {
+            submittedAt: row[0] || '',
+            org: row[1] || '',
+            session_location: row[1] || '',
+            lastName: row[2] || '',
+            firstName: row[3] || '',
+            fullName: `${row[2] || ''} ${row[3] || ''}`.trim(),
+            phone: String(row[4] || ''),
+            role: row[5] || '',
+            email: row[6] || '',
+            id: row[7] || `${row[0]}_${row[4]}`
+          };
+          const key = `${item.id || ''}_${item.phone || ''}_${item.submittedAt || ''}`;
+          if (!existingKeys.has(key)) {
+            localRegs.unshift(item);
+            existingKeys.add(key);
+          }
+        });
+        localStorage.setItem(REG_STORAGE_KEY, JSON.stringify(localRegs));
+      }
+      if (data && Array.isArray(data.surveys)) {
+        const localSurveys = getAllSurveys();
+        const existingKeys = new Set(localSurveys.map(s => `${s.id || ''}_${s.participant_phone || ''}_${s.submittedAt || ''}`));
+        data.surveys.forEach(row => {
+          const item = {
+            submittedAt: row[0] || '',
+            session_location: row[1] || '',
+            participant_name: row[2] || 'Нэргүй',
+            participant_phone: String(row[3] || '-'),
+            q1_overall: Number(row[4]) || 5,
+            q2_risk: Number(row[5]) || 5,
+            q3_communication: Number(row[6]) || 5,
+            q4_game: row[7] || '',
+            q5_action: row[8] || '',
+            q6_feedback: row[9] || '',
+            id: row[10] || `${row[0]}_${row[2]}`
+          };
+          const key = `${item.id || ''}_${item.participant_phone || ''}_${item.submittedAt || ''}`;
+          if (!existingKeys.has(key)) {
+            localSurveys.unshift(item);
+            existingKeys.add(key);
+          }
+        });
+        localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(localSurveys));
+      }
+      updateSessionUI();
+      renderAllData();
+      if (isManual) alert("Google Sheets-ээс шинэ мэдээллүүдийг амжилттай татаж шинэчиллээ!");
+    } catch (e) {
+      if (isManual) alert("Google Sheets холболт амжилтгүй боллоо. Webhook URL болон Apps Script (Who has access: Anyone) тохиргоогоо шалгана уу.");
+    } finally {
+      syncBtn.textContent = oldText;
+    }
+  }
+
+  document.getElementById("btn-sync-cloud").addEventListener("click", () => syncFromGoogleSheets(true));
+
+  function updateSessionUI() {
+    const active = getActiveSession();
+    document.getElementById("active-session-label").textContent = active;
+    
+    const allRegs = getAllRegistrations();
+    const allSurveys = getAllSurveys();
+    const sessions = new Set();
+    
+    allRegs.forEach(r => { if (r.session_location) sessions.add(r.session_location); });
+    allSurveys.forEach(s => { if (s.session_location) sessions.add(s.session_location); });
+
+    const selector = document.getElementById("session-selector");
+    selector.innerHTML = `
+      <option value="ACTIVE">🟢 Одоо идэвхтэй: ${active}</option>
+      <option value="ALL">📁 Бүх сургалтууд (Нийт архив)</option>
+    `;
+    
+    sessions.forEach(s => {
+      if (s !== active) {
+        const rCount = allRegs.filter(r => r.session_location === s).length;
+        const sCount = allSurveys.filter(r => r.session_location === s).length;
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = `📍 ${s} (Ирц: ${rCount}, Санал: ${sCount})`;
+        selector.appendChild(opt);
+      }
+    });
+  }
+
+  function filterItems(items) {
+    const mode = document.getElementById("session-selector").value;
+    const active = getActiveSession();
+    if (mode === "ACTIVE") {
+      return items.filter(r => (r.session_location || active) === active);
+    } else if (mode === "ALL") {
+      return items;
+    } else {
+      return items.filter(r => r.session_location === mode);
+    }
+  }
+
+  function renderAllData() {
+    renderRegistrations();
+    renderSurveys();
+  }
+
+  function renderRegistrations() {
+    const list = filterItems(getAllRegistrations());
+    document.getElementById("reg-stat-total").textContent = list.length;
+    document.getElementById("reg-count-badge").textContent = `${list.length} хүн`;
+
+    const parents = list.filter(r => (r.role || "").includes("Эцэг эх")).length;
+    const teachers = list.filter(r => (r.role || "").includes("Багш")).length;
+    const others = list.length - parents - teachers;
+
+    document.getElementById("reg-stat-parents").textContent = parents;
+    document.getElementById("reg-stat-teachers").textContent = teachers;
+    document.getElementById("reg-stat-others").textContent = Math.max(0, others);
+
+    const container = document.getElementById("reg-list-container");
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state">Энэ сургалтад бүртгүүлсэн оролцогч одоогоор алга байна.<br><br>💡 Эхний бүртгэлийн QR кодыг эцэг эхчүүдэд уншуулахад энд бодит цагаар харагдана.</div>`;
+      return;
+    }
+
+    container.innerHTML = list.map((item, idx) => `
+      <div class="item-box">
+        <div class="item-meta">
+          <span>#${list.length - idx} ${item.fullName || (item.lastName + ' ' + item.firstName)}</span>
+          <span style="color:#94a3b8; font-size:11px;">${item.submittedAt || ''}</span>
+        </div>
+        <div class="item-row">Байгууллага: <strong>${item.org || item.session_location || '-'}</strong> | Албан тушаал: <strong style="color:#38bdf8;">${item.role || '-'}</strong></div>
+        <div class="item-row">Утас: <strong style="color:#34d399;">${item.phone || '-'}</strong> ${item.email ? `| Имэйл: <span>${item.email}</span>` : ''}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderSurveys() {
+    const list = filterItems(getAllSurveys());
+    document.getElementById("survey-stat-count").textContent = list.length;
+    document.getElementById("survey-count-badge").textContent = `${list.length} санал`;
+
+    if (list.length > 0) {
+      const avg = (list.reduce((acc, c) => acc + (c.q1_overall || 5), 0) / list.length).toFixed(1);
+      document.getElementById("survey-stat-avg").textContent = `${avg} ⭐`;
+      
+      const highRisk = list.filter(c => (c.q2_risk || 5) >= 4).length;
+      document.getElementById("survey-stat-risk").textContent = `${Math.round((highRisk / list.length) * 100)}%`;
+
+      const gameEffective = list.filter(c => (c.q4_game || "").includes("үр дүнтэй")).length;
+      document.getElementById("survey-stat-game").textContent = `${Math.round((gameEffective / list.length) * 100)}%`;
+    } else {
+      document.getElementById("survey-stat-avg").textContent = "- ⭐";
+      document.getElementById("survey-stat-risk").textContent = "-";
+      document.getElementById("survey-stat-game").textContent = "-";
+    }
+
+    const container = document.getElementById("survey-list-container");
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state">Энэ сургалтад ирсэн санал асуулга одоогоор алга байна.<br><br>💡 Сургалтын төгсгөлд QR код уншуулахад энд бодит цагаар харагдана.</div>`;
+      return;
+    }
+
+    container.innerHTML = list.map((item, idx) => `
+      <div class="item-box">
+        <div class="item-meta">
+          <span>#${list.length - idx} ${item.participant_name || 'Оролцогч'} (${item.session_location || 'Ерөнхий'})</span>
+          <span style="color:#94a3b8; font-size:11px;">${item.submittedAt || ''}</span>
+        </div>
+        <div class="item-row">Үнэлгээ: <strong>⭐ ${item.q1_overall}/5</strong> | Эрсдэл таньсан: <strong>⭐ ${item.q2_risk}/5</strong> | Шинэ арга: <strong>⭐ ${item.q3_communication}/5</strong></div>
+        <div class="item-row">Тоглоомын үр өгөөж: <strong style="color:#34d399;">${item.q4_game || '-'}</strong></div>
+        ${item.q5_action ? `<div class="item-row" style="margin-top:4px;"><strong>Гэртээ хийх шийдвэр:</strong> <span style="color:#f8fafc;">${item.q5_action}</span></div>` : ''}
+        ${item.q6_feedback ? `<div class="item-row"><strong>Сэтгэгдэл / Санал:</strong> <span style="color:#cbd5e1;">${item.q6_feedback}</span></div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  document.getElementById("session-selector").addEventListener("change", renderAllData);
+
+  // New Session Creation
+  document.getElementById("btn-start-new-session").addEventListener("click", () => {
+    document.getElementById("new-session-modal").style.display = "flex";
+    document.getElementById("new-session-input").value = "";
+    document.getElementById("new-session-input").focus();
+  });
+
+  document.getElementById("btn-confirm-new-session").addEventListener("click", () => {
+    const name = document.getElementById("new-session-input").value.trim();
+    if (!name) {
+      alert("Сургалтын байршил / сургуулийн нэрийг оруулна уу.");
+      return;
+    }
+    setActiveSession(name);
+    document.getElementById("new-session-modal").style.display = "none";
+    updateSessionUI();
+    document.getElementById("session-selector").value = "ACTIVE";
+    renderAllData();
+    alert(`"${name}" нэртэй шинэ сургалтын бүртгэл ба санал асуулга амжилттай эхэллээ!\nӨмнөх сургалтуудтай холилдохгүй тусдаа бүртгэгдэнэ.`);
+  });
+
+  // Download Registration CSV
+  document.getElementById("btn-download-reg-csv").addEventListener("click", () => {
+    const list = filterItems(getAllRegistrations());
+    if (list.length === 0) {
+      alert("Татах бүртгэлийн мэдээлэл алга байна.");
+      return;
+    }
+
+    const bom = "\uFEFF";
+    let csv = bom + "Дугаар,Бүртгэсэн_Огноо,Сургалтын_Байршил,Овог,Нэр,Утасны_Дугаар,Албан_Тушаал_Оролцоо,Имэйл\n";
+    list.forEach((item, idx) => {
+      const clean = (t) => `"${(t || "").toString().replace(/"/g, '""')}"`;
+      csv += [
+        idx + 1,
+        clean(item.submittedAt),
+        clean(item.org || item.session_location || getActiveSession()),
+        clean(item.lastName),
+        clean(item.firstName),
+        clean(item.phone),
+        clean(item.role),
+        clean(item.email)
+      ].join(",") + "\n";
+    });
+
+    downloadCSV(csv, "ICAN_Оролцогчдын_Ирц_Бүртгэл");
+  });
+
+  // Download Survey CSV
+  document.getElementById("btn-download-survey-csv").addEventListener("click", () => {
+    const list = filterItems(getAllSurveys());
+    if (list.length === 0) {
+      alert("Татах санал хүсэлт алга байна.");
+      return;
+    }
+
+    const bom = "\uFEFF";
+    let csv = bom + "Дугаар,Огноо,Сургалтын_Байршил,Оролцогч_Нэр,Утас,Ерөнхий_Үнэлгээ,Эрсдэл_Ойлголт,Харилцах_Шинэ_Арга,Интерактив_Тоглоом,Гэртээ_Хэрэгжүүлэх_Шийдвэр,Сайжруулах_Санал\n";
+    list.forEach((item, idx) => {
+      const clean = (t) => `"${(t || "").toString().replace(/"/g, '""')}"`;
+      csv += [
+        idx + 1,
+        clean(item.submittedAt),
+        clean(item.session_location || getActiveSession()),
+        clean(item.participant_name),
+        clean(item.participant_phone),
+        item.q1_overall || 5,
+        item.q2_risk || 5,
+        item.q3_communication || 5,
+        clean(item.q4_game),
+        clean(item.q5_action),
+        clean(item.q6_feedback)
+      ].join(",") + "\n";
+    });
+
+    downloadCSV(csv, "ICAN_Сэтгэл_Ханамжийн_Тайлан");
+  });
+
+  function downloadCSV(csv, filePrefix) {
+    const currentFilter = document.getElementById("session-selector").value;
+    const targetName = currentFilter === "ACTIVE" ? getActiveSession() : currentFilter;
+    const sessionTag = currentFilter === "ALL" ? "НИЙТ_АРХИВ" : (targetName.replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g, "_"));
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filePrefix}_${sessionTag}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // QR Modals
+  function buildShareLink(page) {
+    const active = getActiveSession();
+    let link = `https://amyabcd.github.io/guyem-runner/${page}?loc=${encodeURIComponent(active)}`;
+    const wh = localStorage.getItem("ican_google_webhook_url");
+    if (wh && wh.trim()) {
+      link += `&wh=${encodeURIComponent(wh.trim())}`;
+    }
+    return link;
+  }
+
+  document.getElementById("btn-show-reg-qr").addEventListener("click", () => {
+    const link = buildShareLink("register.html");
+    document.getElementById("qr-modal-title").textContent = "📋 Сургалтын Эхний Бүртгэлийн QR";
+    document.getElementById("qr-modal-desc").textContent = "Эцэг эхчүүдэд сургалтын эхэнд уншуулах бүртгэлийн холбоос:";
+    document.getElementById("qr-img").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
+    document.getElementById("qr-link-text").textContent = link;
+    document.getElementById("qr-modal").style.display = "flex";
+  });
+
+  document.getElementById("btn-show-survey-qr").addEventListener("click", () => {
+    const link = buildShareLink("survey.html");
+    document.getElementById("qr-modal-title").textContent = "📊 Сэтгэл Ханамжийн Санал Асуулгын QR";
+    document.getElementById("qr-modal-desc").textContent = "Сургалтын төгсгөлд эцэг эхчүүдэд уншуулах санал асуулгын холбоос:";
+    document.getElementById("qr-img").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
+    document.getElementById("qr-link-text").textContent = link;
+    document.getElementById("qr-modal").style.display = "flex";
+  });
+
+  // Settings Modal Handlers
+  document.getElementById("btn-settings").addEventListener("click", () => {
+    document.getElementById("setting-new-pin").value = "";
+    document.getElementById("setting-webhook-url").value = localStorage.getItem("ican_google_webhook_url") || "";
+    document.getElementById("settings-modal").style.display = "flex";
+  });
+
+  document.getElementById("btn-save-pin").addEventListener("click", () => {
+    const np = document.getElementById("setting-new-pin").value.trim();
+    if (np.length < 4) {
+      alert("PIN код багадаа 4 тэмдэгт байх ёстой.");
+      return;
+    }
+    localStorage.setItem(PIN_KEY, np);
+    alert("Шинэ нууц PIN код амжилттай хадгалагдлаа!");
+    document.getElementById("setting-new-pin").value = "";
+  });
+
+  document.getElementById("btn-save-webhook").addEventListener("click", () => {
+    const url = document.getElementById("setting-webhook-url").value.trim();
+    if (url) {
+      localStorage.setItem("ican_google_webhook_url", url);
+      alert("Google Sheets Webhook URL хадгалагдлаа! Одоо бүх бүртгэл ба санал асуулга таны Google Sheet рүү давхар орно.");
+    } else {
+      localStorage.removeItem("ican_google_webhook_url");
+      alert("Google Sheets Webhook устгагдлаа.");
+    }
+    initAdminDashboard();
+  });
+
+  document.getElementById("btn-toggle-script-guide").addEventListener("click", () => {
+    const box = document.getElementById("script-guide-box");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+  });
+
+  document.getElementById("btn-copy-script").addEventListener("click", () => {
+    const code = document.getElementById("apps-script-code").textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      alert("Apps Script код хуулагдлаа!");
+    }).catch(() => {
+      alert("Кодыг гараар идэвхжүүлж хуулна уу.");
+    });
+  });
+
+  // Check login on load
+  if (isLoggedIn()) {
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("admin-container").style.display = "block";
+    initAdminDashboard();
+  }
+</script>
+
+</body>
+</html>
