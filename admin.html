@@ -585,7 +585,7 @@ function doGet(e) {
           <span style="color:#94a3b8; font-size:11px;">${item.submittedAt || ''}</span>
         </div>
         <div class="item-row">Байгууллага: <strong>${item.org || item.session_location || '-'}</strong> | Албан тушаал: <strong style="color:#38bdf8;">${item.role || '-'}</strong></div>
-        <div class="item-row">Утас: <strong style="color:#34d399;">${item.phone || '-'}</strong> | Зураг/Цахим зөвшөөрөл: <strong style="color:${(item.photoConsent || '').includes('Зөвшөөрсөн') ? '#34d399' : '#f87171'};">${item.photoConsent || 'Зөвшөөрөөгүй'}</strong></div>
+        <div class="item-row">Утас: <strong style="color:#34d399;">${item.phone || '-'}</strong> | Зураг/Цахим: <strong style="color:${(item.photoConsent === '✓' || (item.photoConsent || '').includes('Зөвшөөрсөн')) ? '#34d399' : '#94a3b8'};">${(item.photoConsent === '✓' || (item.photoConsent || '').includes('Зөвшөөрсөн')) ? '✓' : '-'}</strong></div>
       </div>
     `).join('');
   }
@@ -673,7 +673,7 @@ function doGet(e) {
         clean(item.firstName),
         clean(item.phone),
         clean(item.role),
-        clean(item.photoConsent || "Зөвшөөрөөгүй")
+        clean(item.photoConsent || "-")
       ].join(",") + "\n";
     });
 

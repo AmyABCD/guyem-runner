@@ -26,8 +26,12 @@
     }
     input:focus, select:focus { border-color: #38bdf8; background: rgba(0, 0, 0, 0.6); }
     select option { background: #0f172a; color: #fff; }
-    .consent-box { display: flex; align-items: flex-start; gap: 12px; background: rgba(0, 0, 0, 0.35); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 13px 14px; cursor: pointer; transition: all 0.2s; }
+    .consent-box { display: flex; align-items: center; gap: 14px; background: rgba(0, 0, 0, 0.35); border: 1.5px solid rgba(255, 255, 255, 0.18); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
     .consent-box.checked { background: rgba(16, 185, 129, 0.14); border-color: #10b981; }
+    .consent-check { appearance: none; -webkit-appearance: none; width: 26px; height: 26px; min-width: 26px; border: 2px solid #38bdf8; border-radius: 7px; background: rgba(255, 255, 255, 0.08); cursor: pointer; display: grid; place-content: center; transition: all 0.15s; }
+    .consent-check::before { content: "✓"; font-size: 17px; font-weight: 900; color: #ffffff; transform: scale(0); transition: transform 0.12s ease-in-out; }
+    .consent-check:checked { background: #10b981; border-color: #10b981; }
+    .consent-check:checked::before { transform: scale(1); }
     
     .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
     .role-chip { background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; font-size: 12.5px; font-weight: 700; color: #cbd5e1; text-align: center; cursor: pointer; transition: all 0.15s; }
@@ -103,18 +107,12 @@
 
     <!-- 5. Photo & Activity Info Online Publishing Consent -->
     <div class="card">
-      <label class="card-label" style="margin-bottom: 10px;">
-        <span>📸</span> <span>Цахим мэдээллийн зөвшөөрөл:</span>
-      </label>
       <label for="photo_consent" class="consent-box" id="consent-box-label">
-        <input type="checkbox" id="photo_consent" style="width:22px; height:22px; accent-color:#10b981; flex-shrink:0; cursor:pointer; margin-top:2px;">
-        <span style="font-size:13.5px; line-height:1.45; color:#e2e8f0; font-weight:600; cursor:pointer;">
+        <input type="checkbox" id="photo_consent" class="consent-check">
+        <span style="font-size:13.5px; line-height:1.45; color:#f1f5f9; font-weight:600; cursor:pointer;">
           Таны зураг, үйл ажиллагааны мэдээлэл цахимд байршиж магадгүй, зөвшөөрч байна уу?
         </span>
       </label>
-      <div id="consent-status-hint" style="font-size:11.5px; color:#94a3b8; margin-top:8px; padding-left:2px;">
-        ☑️ Зөвшөөрч байвал дээрх дөрвөлжинг чагтална уу.
-      </div>
     </div>
 
     <button type="submit" id="btn-submit" class="submit-btn">БҮРТГҮҮЛЭХ (Илгээх) 🚀</button>
@@ -172,16 +170,8 @@
   // Consent checkbox interactive highlight
   const consentCheckbox = document.getElementById('photo_consent');
   const consentLabel = document.getElementById('consent-box-label');
-  const consentHint = document.getElementById('consent-status-hint');
   consentCheckbox.addEventListener('change', () => {
     consentLabel.classList.toggle('checked', consentCheckbox.checked);
-    if (consentCheckbox.checked) {
-      consentHint.textContent = '✅ Зөвшөөрч байна гэж чагталлаа.';
-      consentHint.style.color = '#34d399';
-    } else {
-      consentHint.textContent = '☑️ Зөвшөөрч байвал дээрх дөрвөлжинг чагтална уу.';
-      consentHint.style.color = '#94a3b8';
-    }
   });
 
   // Submit Handler
@@ -192,7 +182,7 @@
     const lastName = document.getElementById('last_name').value.trim();
     const firstName = document.getElementById('first_name').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const photoConsent = consentCheckbox.checked ? 'Зөвшөөрсөн' : 'Зөвшөөрөөгүй';
+    const photoConsent = consentCheckbox.checked ? '✓' : '-';
     
     let role = selectedRole;
     if (role === 'Бусад') {
