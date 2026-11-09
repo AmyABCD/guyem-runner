@@ -21,11 +21,13 @@
     .card-label { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .required { color: #f43f5e; margin-left: 2px; }
     
-    input[type="text"], input[type="tel"], input[type="email"], select {
+    input[type="text"], input[type="tel"], select {
       width: 100%; background: rgba(0, 0, 0, 0.4); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 12px 14px; color: #ffffff; font-size: 14.5px; outline: none; transition: border-color 0.2s, background 0.2s;
     }
     input:focus, select:focus { border-color: #38bdf8; background: rgba(0, 0, 0, 0.6); }
     select option { background: #0f172a; color: #fff; }
+    .consent-box { display: flex; align-items: flex-start; gap: 12px; background: rgba(0, 0, 0, 0.35); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 13px 14px; cursor: pointer; transition: all 0.2s; }
+    .consent-box.checked { background: rgba(16, 185, 129, 0.14); border-color: #10b981; }
     
     .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
     .role-chip { background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; font-size: 12.5px; font-weight: 700; color: #cbd5e1; text-align: center; cursor: pointer; transition: all 0.15s; }
@@ -54,9 +56,9 @@
     <!-- 1. Organization / School -->
     <div class="card">
       <label class="card-label">
-        <span>🏢</span> <span>Байгууллага / Сургууль, цэцэрлэг:</span> <span class="required">*</span>
+        <span>🏢</span> <span>Байгууллагын нэр:</span> <span class="required">*</span>
       </label>
-      <input type="text" id="org_name" placeholder="Жишээ нь: 1-р сургууль, Дархан 2-р цэцэрлэг..." required>
+      <input type="text" id="org_name" placeholder="Байгууллагын нэрээ бичнэ үү" required>
     </div>
 
     <!-- 2. Last Name & First Name -->
@@ -99,12 +101,20 @@
       <input type="text" id="custom_role" placeholder="Албан тушаалаа бичнэ үү..." style="margin-top:10px; display:none;">
     </div>
 
-    <!-- 5. Email (Optional) -->
+    <!-- 5. Photo & Activity Info Online Publishing Consent -->
     <div class="card">
-      <label class="card-label">
-        <span>✉️</span> <span>Имэйл хаяг / Холбоо барих:</span>
+      <label class="card-label" style="margin-bottom: 10px;">
+        <span>📸</span> <span>Цахим мэдээллийн зөвшөөрөл:</span>
       </label>
-      <input type="email" id="email" placeholder="Жишээ нь: name@example.com">
+      <label for="photo_consent" class="consent-box" id="consent-box-label">
+        <input type="checkbox" id="photo_consent" style="width:22px; height:22px; accent-color:#10b981; flex-shrink:0; cursor:pointer; margin-top:2px;">
+        <span style="font-size:13.5px; line-height:1.45; color:#e2e8f0; font-weight:600; cursor:pointer;">
+          Таны зураг, үйл ажиллагааны мэдээлэл цахимд байршиж магадгүй, зөвшөөрч байна уу?
+        </span>
+      </label>
+      <div id="consent-status-hint" style="font-size:11.5px; color:#94a3b8; margin-top:8px; padding-left:2px;">
+        ☑️ Зөвшөөрч байвал дээрх дөрвөлжинг чагтална уу.
+      </div>
     </div>
 
     <button type="submit" id="btn-submit" class="submit-btn">БҮРТГҮҮЛЭХ (Илгээх) 🚀</button>
@@ -159,6 +169,21 @@
     });
   });
 
+  // Consent checkbox interactive highlight
+  const consentCheckbox = document.getElementById('photo_consent');
+  const consentLabel = document.getElementById('consent-box-label');
+  const consentHint = document.getElementById('consent-status-hint');
+  consentCheckbox.addEventListener('change', () => {
+    consentLabel.classList.toggle('checked', consentCheckbox.checked);
+    if (consentCheckbox.checked) {
+      consentHint.textContent = '✅ Зөвшөөрч байна гэж чагталлаа.';
+      consentHint.style.color = '#34d399';
+    } else {
+      consentHint.textContent = '☑️ Зөвшөөрч байвал дээрх дөрвөлжинг чагтална уу.';
+      consentHint.style.color = '#94a3b8';
+    }
+  });
+
   // Submit Handler
   document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -167,7 +192,7 @@
     const lastName = document.getElementById('last_name').value.trim();
     const firstName = document.getElementById('first_name').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
+    const photoConsent = consentCheckbox.checked ? 'Зөвшөөрсөн' : 'Зөвшөөрөөгүй';
     
     let role = selectedRole;
     if (role === 'Бусад') {
@@ -183,7 +208,7 @@
       fullName: `${lastName} ${firstName}`,
       phone: phone,
       role: role,
-      email: email,
+      photoConsent: photoConsent,
       session_location: org,
       submittedAt: new Date().toLocaleString('mn-MN')
     };
@@ -203,11 +228,11 @@
           _subject: `📋 Шинэ оролцогчийн бүртгэл: [${org}] - ${lastName} ${firstName}`,
           _template: 'table',
           _captcha: 'false',
-          'Байгууллага_Сургууль': org,
+          'Байгууллага': org,
           'Овог_Нэр': `${lastName} ${firstName}`,
           'Утасны_дугаар': phone,
           'Албан_тушаал_Оролцоо': role,
-          'Имэйл': email || 'Оруулаагүй',
+          'Зураг_цахим_зөвшөөрөл': photoConsent,
           'Бүртгэсэн_Огноо': regData.submittedAt
         })
       }).catch(err => console.warn('FormSubmit network note:', err));

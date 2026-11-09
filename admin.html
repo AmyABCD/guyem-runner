@@ -238,8 +238,8 @@
       Өмнөх сургалтын бүртгэл болон үнэлгээг аюулгүй архивлаж, дараагийн байршил/сургуулийн мэдээллийг шинээр авч эхэлнэ.
     </p>
     <div class="input-group">
-      <label class="input-label">Шинэ сургалтын байршил / Сургуулийн нэр:</label>
-      <input type="text" id="new-session-input" class="input-field" placeholder="Жишээ нь: 23-р сургууль, Дархан 5-р цэцэрлэг...">
+      <label class="input-label">Шинэ сургалт болох байгууллагын нэр:</label>
+      <input type="text" id="new-session-input" class="input-field" placeholder="Байгууллагын нэрээ бичнэ үү">
     </div>
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button onclick="document.getElementById('new-session-modal').style.display='none'" class="select-session" style="flex:1; padding:10px;">Болих</button>
@@ -306,13 +306,13 @@
   var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
   if (sheet.getLastRow() === 0) {
     if (data.type === 'registration') {
-      sheet.appendRow(['Огноо','Байгууллага','Овог','Нэр','Утас','Оролцоо','Имэйл','ID']);
+      sheet.appendRow(['Огноо','Байгууллага','Овог','Нэр','Утас','Оролцоо','ЗурагЗөвшөөрөл','ID']);
     } else {
       sheet.appendRow(['Огноо','Байршил','Нэр','Утас','Үнэлгээ','Эрсдэл','ШинэАрга','Тоглоом','Шийдвэр','Санал','ID']);
     }
   }
   if (data.type === 'registration') {
-    sheet.appendRow([data.submittedAt, data.org, data.lastName, data.firstName, data.phone, data.role, data.email, data.id]);
+    sheet.appendRow([data.submittedAt, data.org, data.lastName, data.firstName, data.phone, data.role, data.photoConsent || '', data.id]);
   } else {
     sheet.appendRow([data.submittedAt, data.session_location, data.participant_name, data.participant_phone, data.q1_overall, data.q2_risk, data.q3_communication, data.q4_game, data.q5_action, data.q6_feedback, data.id]);
   }
@@ -465,7 +465,7 @@ function doGet(e) {
             fullName: `${row[2] || ''} ${row[3] || ''}`.trim(),
             phone: String(row[4] || ''),
             role: row[5] || '',
-            email: row[6] || '',
+            photoConsent: row[6] || '',
             id: row[7] || `${row[0]}_${row[4]}`
           };
           const key = `${item.id || ''}_${item.phone || ''}_${item.submittedAt || ''}`;
@@ -585,7 +585,7 @@ function doGet(e) {
           <span style="color:#94a3b8; font-size:11px;">${item.submittedAt || ''}</span>
         </div>
         <div class="item-row">Байгууллага: <strong>${item.org || item.session_location || '-'}</strong> | Албан тушаал: <strong style="color:#38bdf8;">${item.role || '-'}</strong></div>
-        <div class="item-row">Утас: <strong style="color:#34d399;">${item.phone || '-'}</strong> ${item.email ? `| Имэйл: <span>${item.email}</span>` : ''}</div>
+        <div class="item-row">Утас: <strong style="color:#34d399;">${item.phone || '-'}</strong> | Зураг/Цахим зөвшөөрөл: <strong style="color:${(item.photoConsent || '').includes('Зөвшөөрсөн') ? '#34d399' : '#f87171'};">${item.photoConsent || 'Зөвшөөрөөгүй'}</strong></div>
       </div>
     `).join('');
   }
@@ -662,7 +662,7 @@ function doGet(e) {
     }
 
     const bom = "\uFEFF";
-    let csv = bom + "Дугаар,Бүртгэсэн_Огноо,Сургалтын_Байршил,Овог,Нэр,Утасны_Дугаар,Албан_Тушаал_Оролцоо,Имэйл\n";
+    let csv = bom + "Дугаар,Бүртгэсэн_Огноо,Байгууллагын_Нэр,Овог,Нэр,Утасны_Дугаар,Албан_Тушаал_Оролцоо,Зураг_Цахим_Зөвшөөрөл\n";
     list.forEach((item, idx) => {
       const clean = (t) => `"${(t || "").toString().replace(/"/g, '""')}"`;
       csv += [
@@ -673,7 +673,7 @@ function doGet(e) {
         clean(item.firstName),
         clean(item.phone),
         clean(item.role),
-        clean(item.email)
+        clean(item.photoConsent || "Зөвшөөрөөгүй")
       ].join(",") + "\n";
     });
 
